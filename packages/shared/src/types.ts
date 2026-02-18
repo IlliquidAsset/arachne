@@ -1,3 +1,9 @@
-// @amanda/shared - shared type definitions
-// Stub: will be populated as packages extract shared types
-export {};
+export type {
+  AmandaGlobalConfig,
+  ServicesRegistry,
+  ServiceEntry,
+} from "./config-schema.js";
+
+export type { DatabaseDependencies } from "./db.js";
+
+export type { RoleRecord, WorkflowRecord } from "./helpers.js";
