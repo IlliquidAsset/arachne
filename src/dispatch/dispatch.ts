@@ -10,6 +10,9 @@ import { loadAmandaConfig, type AmandaConfig } from "../config"
 import { projectRegistry, type ProjectRegistry } from "../discovery/registry"
 import { startServer } from "../server/lifecycle"
 import { serverRegistry, type ServerRegistry } from "../server/registry"
+import { parseOverrides } from "../session/override-parser"
+import { findBestSession } from "../session/targeting"
+import type { TargetingOptions } from "../session/types"
 import { dispatchTracker, type DispatchTracker } from "./tracker"
 import type { DispatchOptions, DispatchRecord, DispatchResult } from "./types"
 
@@ -34,40 +37,49 @@ function toErrorMessage(error: unknown): string {
   return String(error)
 }
 
-function selectMostRecentSession(sessions: SessionInfo[]): SessionInfo | undefined {
-  return sessions.reduce<SessionInfo | undefined>((latest, current) => {
-    if (!latest) return current
-    return current.time.updated > latest.time.updated ? current : latest
-  }, undefined)
-}
-
 function getApiKey(config: AmandaConfig): string | undefined {
   if (!config.auth.enabled) return undefined
   return config.auth.apiKey || undefined
 }
 
+interface ResolvedSession {
+  sessionId: string
+  cleanedMessage: string
+}
+
 async function resolveSessionId(
   client: OpencodeClient,
+  message: string,
   opts: DispatchOptions | undefined,
   dependencies: DispatchDependencies,
-): Promise<string> {
-  if (opts?.session) {
-    return opts.session
+): Promise<ResolvedSession> {
+  const { options: nlOpts, cleanedMessage } = parseOverrides(message)
+
+  const targetingOpts: TargetingOptions = {
+    sessionId: opts?.session ?? nlOpts.sessionId,
+    newSession: opts?.newSession ?? nlOpts.newSession,
+    titleKeyword: nlOpts.titleKeyword,
+    strategyHint: nlOpts.strategyHint,
   }
 
-  if (opts?.newSession) {
+  if (targetingOpts.sessionId) {
+    return { sessionId: targetingOpts.sessionId, cleanedMessage }
+  }
+
+  if (targetingOpts.newSession) {
     const created = await dependencies.createSessionFn(client)
-    return created.id
+    return { sessionId: created.id, cleanedMessage }
   }
 
   const sessions = await dependencies.listSessionsFn(client)
-  const latest = selectMostRecentSession(sessions)
-  if (latest) {
-    return latest.id
+  const result = findBestSession(sessions, message, targetingOpts)
+
+  if (result.needsCreate || !result.sessionId) {
+    const created = await dependencies.createSessionFn(client)
+    return { sessionId: created.id, cleanedMessage }
   }
 
-  const created = await dependencies.createSessionFn(client)
-  return created.id
+  return { sessionId: result.sessionId, cleanedMessage }
 }
 
 function resolveProject(
@@ -135,10 +147,15 @@ export function createDispatch(dependencies: DispatchDependencies) {
         apiKey,
       )
 
-      const sessionId = await resolveSessionId(client, opts, dependencies)
+      const { sessionId, cleanedMessage } = await resolveSessionId(
+        client,
+        message,
+        opts,
+        dependencies,
+      )
 
       await dependencies.sendMessageAsyncFn(client, sessionId, {
-        parts: [{ type: "text", text: message }],
+        parts: [{ type: "text", text: cleanedMessage }],
       })
 
       dependencies.tracker.record({
