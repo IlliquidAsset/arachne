@@ -3,7 +3,7 @@ import { tool } from "@opencode-ai/plugin/tool"
 import { dirname } from "node:path"
 import { abortSession, clientPool, listSessions } from "./client"
 import { loadAmandaConfig, type AmandaConfig } from "./config"
-import { dispatch, dispatchTracker } from "./dispatch"
+import { dispatch, dispatchTracker, routeMessage } from "./dispatch"
 import { projectRegistry, scanProjects, type ProjectInfo } from "./discovery"
 import { buildAllProfiles, clearProfiles, getProfile } from "./knowledge"
 import {
@@ -110,7 +110,8 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         args: {
           project: tool.schema
             .string()
-            .describe("Project identifier to dispatch to"),
+            .optional()
+            .describe("Project identifier to dispatch to (optional when routable)"),
           message: tool.schema
             .string()
             .describe("Task message to dispatch to the agent"),
@@ -125,9 +126,25 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         },
         async execute(args) {
           try {
+            let projectName = args.project?.trim()
+            let message = args.message
+
+            if (!projectName) {
+              const routing = routeMessage(args.message)
+              if (!routing.projectId) {
+                const options = routing.candidates?.join(", ") || "none"
+                return `Which project? Options: ${options}`
+              }
+
+              projectName = routing.projectId
+              if (routing.cleanedMessage && routing.cleanedMessage.length > 0) {
+                message = routing.cleanedMessage
+              }
+            }
+
             const result = await dispatch(
-              args.project,
-              args.message,
+              projectName,
+              message,
               {
                 session: args.session,
                 newSession: args.newSession,
