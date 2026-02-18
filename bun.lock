@@ -30,6 +30,9 @@
     "packages/context": {
       "name": "@amanda/context",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
     },
     "packages/orchestrator": {
       "name": "@amanda/orchestrator",
@@ -62,6 +65,10 @@
     "packages/skills": {
       "name": "@amanda/skills",
       "version": "0.1.0",
+      "dependencies": {
+        "yaml": "^2.8.2",
+        "zod": "^4.3.6",
+      },
     },
     "packages/spdd": {
       "name": "@amanda/spdd",
@@ -182,6 +189,8 @@
     "util-deprecate": ["util-deprecate@1.0.2", "", {}, "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw=="],
 
     "wrappy": ["wrappy@1.0.2", "", {}, "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="],
+
+    "yaml": ["yaml@2.8.2", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A=="],
 
     "zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
