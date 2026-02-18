@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/orchestrator" },
+    { "path": "packages/autonomy" },
+    { "path": "packages/context" },
+    { "path": "packages/skills" },
+    { "path": "packages/spdd" },
+    { "path": "packages/budget" },
+    { "path": "packages/web" },
+    { "path": "packages/bootstrap" },
+    { "path": "packages/safety" }
+  ]
+}

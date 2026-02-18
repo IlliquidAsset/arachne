@@ -1,5 +1,5 @@
 {
-  "name": "amanda-orchestrator",
+  "name": "@amanda/orchestrator",
   "version": "0.1.0",
   "description": "Amanda orchestrator plugin for OpenCode",
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --format esm --target node && tsc --emitDeclarationOnly",
+    "build": "bun build src/index.ts --outdir dist --format esm --target node && tsc --build",
     "test": "bun test src/",
     "test:integration": "bun test test/",
     "test:all": "bun test",
