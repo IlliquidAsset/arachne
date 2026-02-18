@@ -1,13 +1,30 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import { tool } from "@opencode-ai/plugin/tool"
+import { loadAmandaConfig } from "./config"
 
-const AmandaOrchestratorPlugin: Plugin = async (_ctx) => {
+const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
+  const _config = loadAmandaConfig(ctx.directory)
+
   return {
     tool: {
       amanda_dispatch: tool({
-        description: "Dispatch a task to an Amanda agent instance",
+        description:
+          "Dispatch a task to an Amanda agent instance in a specific project",
         args: {
-          task: tool.schema.string().describe("Task description to dispatch"),
+          project: tool.schema
+            .string()
+            .describe("Project identifier to dispatch to"),
+          message: tool.schema
+            .string()
+            .describe("Task message to dispatch to the agent"),
+          session: tool.schema
+            .string()
+            .optional()
+            .describe("Existing session ID to continue"),
+          newSession: tool.schema
+            .boolean()
+            .optional()
+            .describe("Force create a new session"),
         },
         async execute(_args) {
           return "amanda_dispatch: Not yet implemented"
@@ -15,7 +32,8 @@ const AmandaOrchestratorPlugin: Plugin = async (_ctx) => {
       }),
 
       amanda_projects: tool({
-        description: "List available Amanda projects and their configurations",
+        description:
+          "List available Amanda projects and their configurations",
         args: {
           filter: tool.schema
             .string()
@@ -38,11 +56,13 @@ const AmandaOrchestratorPlugin: Plugin = async (_ctx) => {
       }),
 
       amanda_server_control: tool({
-        description: "Control Amanda server instances (start, stop, restart)",
+        description:
+          "Control Amanda server instances (start, stop, restart, status)",
         args: {
           action: tool.schema
             .enum(["start", "stop", "restart", "status"])
             .describe("Server control action"),
+          project: tool.schema.string().describe("Project identifier"),
         },
         async execute(_args) {
           return "amanda_server_control: Not yet implemented"
@@ -50,15 +70,9 @@ const AmandaOrchestratorPlugin: Plugin = async (_ctx) => {
       }),
 
       amanda_sessions: tool({
-        description: "List and manage active Amanda sessions",
+        description: "List active Amanda sessions for a project",
         args: {
-          action: tool.schema
-            .enum(["list", "get", "close"])
-            .describe("Session management action"),
-          session_id: tool.schema
-            .string()
-            .optional()
-            .describe("Session ID (required for get/close)"),
+          project: tool.schema.string().describe("Project identifier"),
         },
         async execute(_args) {
           return "amanda_sessions: Not yet implemented"
@@ -68,9 +82,8 @@ const AmandaOrchestratorPlugin: Plugin = async (_ctx) => {
       amanda_abort: tool({
         description: "Abort a running Amanda task or session",
         args: {
-          target: tool.schema
-            .string()
-            .describe("Task or session ID to abort"),
+          project: tool.schema.string().describe("Project identifier"),
+          sessionId: tool.schema.string().describe("Session ID to abort"),
         },
         async execute(_args) {
           return "amanda_abort: Not yet implemented"
