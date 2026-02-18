@@ -82,8 +82,22 @@ function updateProjectState(project: ProjectInfo): void {
 
 const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
   const config = loadAmandaConfig(ctx.directory)
-  const scanRoot = dirname(ctx.directory)
-  const discoveredProjects = await scanProjects(scanRoot, config.discovery.ignore)
+  const configuredRoots = config.discovery.paths.filter(
+    (path): path is string => typeof path === "string" && path.trim().length > 0,
+  )
+  const scanRoots =
+    configuredRoots.length > 0
+      ? configuredRoots
+      : [ctx.directory, dirname(ctx.directory)]
+
+  let discoveredProjects: ProjectInfo[] = []
+  for (const scanRoot of scanRoots) {
+    const projects = await scanProjects(scanRoot, config.discovery.ignore)
+    if (projects.length > 0) {
+      discoveredProjects = projects
+      break
+    }
+  }
 
   projectRegistry.clear()
   for (const project of discoveredProjects) {
