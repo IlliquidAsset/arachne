@@ -3,6 +3,14 @@ import { pcmToWav } from "./audio-utils"
 import { NotificationQueue } from "./notification-queue"
 
 const DEFAULT_SAMPLE_RATE = 16_000
+const INTERRUPT_DEBOUNCE_MS = 200
+
+export type PipelineStage =
+  | "idle"
+  | "stt"
+  | "llm"
+  | "tts"
+  | "speaking_notification"
 
 class PipelineAbortedError extends Error {
   constructor() {
@@ -11,9 +19,9 @@ class PipelineAbortedError extends Error {
 }
 
 export interface PipelineDependencies {
-  transcribe: (audio: Buffer) => Promise<string>
-  sendToLLM: (text: string) => Promise<string>
-  generateSpeechStream: (text: string) => AsyncGenerator<Float32Array>
+  transcribe: (audio: Buffer, signal?: AbortSignal) => Promise<string>
+  sendToLLM: (text: string, signal?: AbortSignal) => Promise<string>
+  generateSpeechStream: (text: string, signal?: AbortSignal) => AsyncGenerator<Float32Array>
   sendMessage: (ws: any, msg: ServerMessage) => void
   sendAudio: (ws: any, audio: Float32Array | Buffer) => void
 }
@@ -23,7 +31,10 @@ export class VoicePipeline {
   private readonly notificationQueue: NotificationQueue
   private readonly sampleRate: number
   private processing = false
+  private stage: PipelineStage = "idle"
   private abortController: AbortController | null = null
+  private lastInterruptTime = 0
+  private activeSpeechStream: AsyncGenerator<Float32Array> | null = null
 
   constructor(
     dependencies: PipelineDependencies,
@@ -43,10 +54,26 @@ export class VoicePipeline {
     if (this.abortController) {
       this.abortController.abort()
     }
+
+    this.cleanupForStage()
+  }
+
+  interrupt(): void {
+    const now = Date.now()
+    if (now - this.lastInterruptTime < INTERRUPT_DEBOUNCE_MS) {
+      return
+    }
+
+    this.lastInterruptTime = now
+    this.cancel()
   }
 
   isProcessing(): boolean {
     return this.processing
+  }
+
+  getStage(): PipelineStage {
+    return this.stage
   }
 
   async handleSpeechEnd(audioBuffer: Buffer, ws: any): Promise<void> {
@@ -65,9 +92,10 @@ export class VoicePipeline {
       const pcm = this.bufferToPcm16(audioBuffer)
       const wavBuffer = pcmToWav(pcm, this.sampleRate)
 
+      this.stage = "stt"
       let transcription = ""
       try {
-        transcription = await this.dependencies.transcribe(wavBuffer)
+        transcription = await this.dependencies.transcribe(wavBuffer, signal)
       } catch {
         if (!signal.aborted) {
           this.dependencies.sendMessage(ws, {
@@ -86,9 +114,10 @@ export class VoicePipeline {
 
       this.dependencies.sendMessage(ws, { type: "thinking" })
 
+      this.stage = "llm"
       let responseText = ""
       try {
-        responseText = await this.dependencies.sendToLLM(transcription)
+        responseText = await this.dependencies.sendToLLM(transcription, signal)
       } catch {
         if (!signal.aborted) {
           this.dependencies.sendMessage(ws, {
@@ -100,8 +129,11 @@ export class VoicePipeline {
       }
 
       this.throwIfAborted(signal)
+      this.stage = "tts"
       await this.speakText(ws, responseText, signal)
       this.throwIfAborted(signal)
+
+      this.stage = "speaking_notification"
       await this.flushNotifications(ws, signal)
     } catch (error) {
       if (!(error instanceof PipelineAbortedError)) {
@@ -109,6 +141,8 @@ export class VoicePipeline {
       }
     } finally {
       this.processing = false
+      this.stage = "idle"
+      this.activeSpeechStream = null
       this.abortController = null
       this.dependencies.sendMessage(ws, { type: "listening" })
     }
@@ -127,14 +161,21 @@ export class VoicePipeline {
     })
     this.dependencies.sendMessage(ws, { type: "speaking" })
 
+    const stream = this.dependencies.generateSpeechStream(text, signal)
+    this.activeSpeechStream = stream
+
     try {
-      for await (const chunk of this.dependencies.generateSpeechStream(text)) {
+      for await (const chunk of stream) {
         this.throwIfAborted(signal)
         this.dependencies.sendAudio(ws, chunk)
       }
     } catch (error) {
       if (error instanceof PipelineAbortedError || signal.aborted) {
         throw new PipelineAbortedError()
+      }
+    } finally {
+      if (this.activeSpeechStream === stream) {
+        this.activeSpeechStream = null
       }
     }
   }
@@ -153,6 +194,20 @@ export class VoicePipeline {
     if (signal.aborted) {
       throw new PipelineAbortedError()
     }
+  }
+
+  private cleanupForStage(): void {
+    if (this.stage === "tts" || this.stage === "speaking_notification") {
+      this.stopActiveSpeechStream()
+    }
+  }
+
+  private stopActiveSpeechStream(): void {
+    if (!this.activeSpeechStream?.return) {
+      return
+    }
+
+    void this.activeSpeechStream.return(undefined)
   }
 
   private bufferToPcm16(audioBuffer: Buffer): Int16Array {
