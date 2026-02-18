@@ -25,3 +25,40 @@ export {
   DAILY_GROK,
   registerBuiltinWorkflows,
 } from "./builtin-workflows.js";
+
+export {
+  agentRoster,
+  getAgent,
+  listAgents,
+  selectAgent,
+  type AgentEntry,
+  type AgentRoster,
+} from "./agent-roster.js";
+
+export {
+  generatePreamble,
+  type PreambleContext,
+} from "./preamble.js";
+
+export {
+  classify,
+  type ClassificationResult,
+  type ClassifierDependencies,
+} from "./classifier.js";
+
+export {
+  TaskQueue,
+  type QueuedTask,
+  type TaskLifecycleStatus,
+  type TaskPriority,
+  type TaskQueueOptions,
+  type TaskStatus,
+  type TaskTrack,
+} from "./scheduler.js";
+
+export {
+  AutonomyEngine,
+  type EngineDependencies,
+  type EngineProcessOptions,
+  type EngineResult,
+} from "./engine.js";
