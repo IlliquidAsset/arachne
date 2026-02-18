@@ -27,6 +27,66 @@ export const AmandaConfigSchema = z.object({
       timeout: z.number().default(300000),
     })
     .default({ maxConcurrent: 3, timeout: 300000 }),
+  voice: z
+    .object({
+      enabled: z.boolean().default(false),
+      port: z.number().min(1).max(65535).default(8090),
+      whisper: z
+        .object({
+          binaryPath: z.string().default("whisper-server"),
+          modelPath: z.string().default("~/.config/amanda/models/ggml-large-v3-turbo.bin"),
+          serverPort: z.number().min(1).max(65535).default(9000),
+          language: z.string().default("en"),
+          useCoreML: z.boolean().default(true),
+        })
+        .default({
+          binaryPath: "whisper-server",
+          modelPath: "~/.config/amanda/models/ggml-large-v3-turbo.bin",
+          serverPort: 9000,
+          language: "en",
+          useCoreML: true,
+        }),
+      tts: z
+        .object({
+          engine: z.enum(["kokoro"]).default("kokoro"),
+          voiceId: z.string().default("af_heart"),
+          sampleRate: z.number().default(24000),
+        })
+        .default({
+          engine: "kokoro",
+          voiceId: "af_heart",
+          sampleRate: 24000,
+        }),
+      vad: z
+        .object({
+          silenceThreshold: z.number().default(640),
+        })
+        .default({
+          silenceThreshold: 640,
+        }),
+      maxConcurrentSessions: z.number().min(1).default(1),
+    })
+    .default({
+      enabled: false,
+      port: 8090,
+      whisper: {
+        binaryPath: "whisper-server",
+        modelPath: "~/.config/amanda/models/ggml-large-v3-turbo.bin",
+        serverPort: 9000,
+        language: "en",
+        useCoreML: true,
+      },
+      tts: {
+        engine: "kokoro",
+        voiceId: "af_heart",
+        sampleRate: 24000,
+      },
+      vad: {
+        silenceThreshold: 640,
+      },
+      maxConcurrentSessions: 1,
+    }),
 })
 
 export type AmandaConfig = z.infer<typeof AmandaConfigSchema>
+export type VoiceConfig = z.infer<typeof AmandaConfigSchema>["voice"]

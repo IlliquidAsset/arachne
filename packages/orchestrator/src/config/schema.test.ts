@@ -76,4 +76,117 @@ describe("AmandaConfigSchema", () => {
     expect(config.servers.autoStart).toBe(false)
     expect(config.servers.portRange).toEqual([4100, 4200])
   })
+
+  test("applies voice defaults when no voice section provided", () => {
+    const config = AmandaConfigSchema.parse({})
+
+    expect(config.voice.enabled).toBe(false)
+    expect(config.voice.port).toBe(8090)
+    expect(config.voice.whisper.binaryPath).toBe("whisper-server")
+    expect(config.voice.whisper.modelPath).toBe("~/.config/amanda/models/ggml-large-v3-turbo.bin")
+    expect(config.voice.whisper.serverPort).toBe(9000)
+    expect(config.voice.whisper.language).toBe("en")
+    expect(config.voice.whisper.useCoreML).toBe(true)
+    expect(config.voice.tts.engine).toBe("kokoro")
+    expect(config.voice.tts.voiceId).toBe("af_heart")
+    expect(config.voice.tts.sampleRate).toBe(24000)
+    expect(config.voice.vad.silenceThreshold).toBe(640)
+    expect(config.voice.maxConcurrentSessions).toBe(1)
+  })
+
+  test("accepts valid custom voice config", () => {
+    const config = AmandaConfigSchema.parse({
+      voice: {
+        enabled: true,
+        port: 8091,
+        whisper: {
+          binaryPath: "/custom/whisper",
+          modelPath: "/custom/model.bin",
+          serverPort: 9001,
+          language: "es",
+          useCoreML: false,
+        },
+        tts: {
+          engine: "kokoro",
+          voiceId: "af_bella",
+          sampleRate: 48000,
+        },
+        vad: {
+          silenceThreshold: 500,
+        },
+        maxConcurrentSessions: 5,
+      },
+    })
+
+    expect(config.voice.enabled).toBe(true)
+    expect(config.voice.port).toBe(8091)
+    expect(config.voice.whisper.binaryPath).toBe("/custom/whisper")
+    expect(config.voice.whisper.modelPath).toBe("/custom/model.bin")
+    expect(config.voice.whisper.serverPort).toBe(9001)
+    expect(config.voice.whisper.language).toBe("es")
+    expect(config.voice.whisper.useCoreML).toBe(false)
+    expect(config.voice.tts.engine).toBe("kokoro")
+    expect(config.voice.tts.voiceId).toBe("af_bella")
+    expect(config.voice.tts.sampleRate).toBe(48000)
+    expect(config.voice.vad.silenceThreshold).toBe(500)
+    expect(config.voice.maxConcurrentSessions).toBe(5)
+  })
+
+  test("rejects invalid voice port (negative)", () => {
+    expect(() =>
+      AmandaConfigSchema.parse({ voice: { port: -1 } }),
+    ).toThrow()
+  })
+
+  test("rejects invalid voice port (exceeds max)", () => {
+    expect(() =>
+      AmandaConfigSchema.parse({ voice: { port: 65536 } }),
+    ).toThrow()
+  })
+
+  test("rejects invalid whisper server port", () => {
+    expect(() =>
+      AmandaConfigSchema.parse({ voice: { whisper: { serverPort: 0 } } }),
+    ).toThrow()
+  })
+
+  test("rejects invalid tts engine", () => {
+    expect(() =>
+      AmandaConfigSchema.parse({ voice: { tts: { engine: "invalid-engine" } } }),
+    ).toThrow()
+  })
+
+  test("rejects invalid maxConcurrentSessions (zero)", () => {
+    expect(() =>
+      AmandaConfigSchema.parse({ voice: { maxConcurrentSessions: 0 } }),
+    ).toThrow()
+  })
+
+  test("merges partial voice config with defaults", () => {
+    const config = AmandaConfigSchema.parse({
+      voice: { enabled: true, port: 8095 },
+    })
+
+    expect(config.voice.enabled).toBe(true)
+    expect(config.voice.port).toBe(8095)
+    expect(config.voice.whisper.binaryPath).toBe("whisper-server")
+    expect(config.voice.tts.engine).toBe("kokoro")
+    expect(config.voice.maxConcurrentSessions).toBe(1)
+  })
+
+  test("maintains backward compatibility with existing config (no voice section)", () => {
+    const config = AmandaConfigSchema.parse({
+      discovery: { paths: ["/projects"] },
+      servers: { portRange: [5000, 5100] },
+      auth: { apiKey: "test-key" },
+      dispatch: { maxConcurrent: 5 },
+    })
+
+    expect(config.discovery.paths).toEqual(["/projects"])
+    expect(config.servers.portRange).toEqual([5000, 5100])
+    expect(config.auth.apiKey).toBe("test-key")
+    expect(config.dispatch.maxConcurrent).toBe(5)
+    expect(config.voice.enabled).toBe(false)
+    expect(config.voice.port).toBe(8090)
+  })
 })
