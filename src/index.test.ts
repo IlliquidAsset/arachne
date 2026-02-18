@@ -77,7 +77,7 @@ describe("AmandaOrchestratorPlugin", () => {
     expect(args.sessionId).toBeDefined()
   })
 
-  test("all tool stubs return not-yet-implemented messages", async () => {
+  test("all tools execute and return human-readable strings", async () => {
     const hooks = await AmandaOrchestratorPlugin(mockCtx)
     const toolCtx = {
       sessionID: "test",
@@ -90,13 +90,45 @@ describe("AmandaOrchestratorPlugin", () => {
       ask: async () => {},
     }
 
-    for (const [name, def] of Object.entries(hooks.tool!)) {
-      const result = await def.execute(
-        { project: "test", message: "test", sessionId: "test", action: "status", filter: "" },
-        toolCtx,
-      )
-      expect(result).toContain("Not yet implemented")
-      expect(result).toContain(name)
+    const missingProject = "missing-project-id-for-plugin-test"
+
+    const dispatchResult = await hooks.tool!.amanda_dispatch.execute(
+      { project: missingProject, message: "test" },
+      toolCtx,
+    )
+    const projectsResult = await hooks.tool!.amanda_projects.execute(
+      { filter: "" },
+      toolCtx,
+    )
+    const projectStatusResult = await hooks.tool!.amanda_project_status.execute(
+      { project: missingProject },
+      toolCtx,
+    )
+    const serverControlResult = await hooks.tool!.amanda_server_control.execute(
+      { action: "status", project: missingProject },
+      toolCtx,
+    )
+    const sessionsResult = await hooks.tool!.amanda_sessions.execute(
+      { project: missingProject },
+      toolCtx,
+    )
+    const abortResult = await hooks.tool!.amanda_abort.execute(
+      { project: missingProject, sessionId: "session-1" },
+      toolCtx,
+    )
+
+    const results = [
+      dispatchResult,
+      projectsResult,
+      projectStatusResult,
+      serverControlResult,
+      sessionsResult,
+      abortResult,
+    ]
+
+    for (const result of results) {
+      expect(result).toBeTypeOf("string")
+      expect(result.length).toBeGreaterThan(0)
     }
   })
 })

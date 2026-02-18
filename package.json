@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --format esm && tsc --emitDeclarationOnly",
+    "build": "bun build src/index.ts --outdir dist --format esm --target node && tsc --emitDeclarationOnly",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"

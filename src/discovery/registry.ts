@@ -107,3 +107,5 @@ export class ProjectRegistry {
     }
   }
 }
+
+export const projectRegistry = new ProjectRegistry()

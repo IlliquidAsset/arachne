@@ -1,5 +1,5 @@
 export { scanProjects } from "./scanner"
-export { ProjectRegistry } from "./registry"
+export { ProjectRegistry, projectRegistry } from "./registry"
 export { startWatching } from "./watcher"
 export type { WatcherChangeEvent, WatcherCallback } from "./watcher"
 export {
