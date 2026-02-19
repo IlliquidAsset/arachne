@@ -7,3 +7,12 @@ export type {
 export type { DatabaseDependencies } from "./db.js";
 
 export type { RoleRecord, WorkflowRecord } from "./helpers.js";
+
+export type {
+  VoiceInput,
+  VoiceOutput,
+  VoiceProvider,
+  VoiceStatus,
+} from "./voice-interface.js";
+
+export type { VoiceEvent, VoiceEventType } from "./voice-events.js";

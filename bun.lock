@@ -10,32 +10,33 @@
       },
     },
     "packages/autonomy": {
-      "name": "@amanda/autonomy",
+      "name": "@arachne/autonomy",
       "version": "0.1.0",
       "dependencies": {
+        "@arachne/shared": "workspace:*",
         "zod": "^4.3.6",
       },
     },
     "packages/bootstrap": {
-      "name": "@amanda/bootstrap",
+      "name": "@arachne/bootstrap",
       "version": "0.1.0",
     },
     "packages/budget": {
-      "name": "@amanda/budget",
+      "name": "@arachne/budget",
       "version": "0.1.0",
       "dependencies": {
         "zod": "^4.3.6",
       },
     },
     "packages/context": {
-      "name": "@amanda/context",
+      "name": "@arachne/context",
       "version": "0.1.0",
       "dependencies": {
         "zod": "^4.3.6",
       },
     },
     "packages/orchestrator": {
-      "name": "@amanda/orchestrator",
+      "name": "@arachne/orchestrator",
       "version": "0.1.0",
       "dependencies": {
         "@opencode-ai/plugin": "^1.1.19",
@@ -48,11 +49,11 @@
       },
     },
     "packages/safety": {
-      "name": "@amanda/safety",
+      "name": "@arachne/safety",
       "version": "0.1.0",
     },
     "packages/shared": {
-      "name": "@amanda/shared",
+      "name": "@arachne/shared",
       "version": "0.1.0",
       "dependencies": {
         "better-sqlite3": "^12.6.2",
@@ -63,7 +64,7 @@
       },
     },
     "packages/skills": {
-      "name": "@amanda/skills",
+      "name": "@arachne/skills",
       "version": "0.1.0",
       "dependencies": {
         "yaml": "^2.8.2",
@@ -71,37 +72,37 @@
       },
     },
     "packages/spdd": {
-      "name": "@amanda/spdd",
+      "name": "@arachne/spdd",
       "version": "0.1.0",
       "dependencies": {
         "zod": "^4.3.6",
       },
     },
     "packages/web": {
-      "name": "@amanda/web",
+      "name": "@arachne/web",
       "version": "0.1.0",
     },
   },
   "packages": {
-    "@amanda/autonomy": ["@amanda/autonomy@workspace:packages/autonomy"],
+    "@arachne/autonomy": ["@arachne/autonomy@workspace:packages/autonomy"],
 
-    "@amanda/bootstrap": ["@amanda/bootstrap@workspace:packages/bootstrap"],
+    "@arachne/bootstrap": ["@arachne/bootstrap@workspace:packages/bootstrap"],
 
-    "@amanda/budget": ["@amanda/budget@workspace:packages/budget"],
+    "@arachne/budget": ["@arachne/budget@workspace:packages/budget"],
 
-    "@amanda/context": ["@amanda/context@workspace:packages/context"],
+    "@arachne/context": ["@arachne/context@workspace:packages/context"],
 
-    "@amanda/orchestrator": ["@amanda/orchestrator@workspace:packages/orchestrator"],
+    "@arachne/orchestrator": ["@arachne/orchestrator@workspace:packages/orchestrator"],
 
-    "@amanda/safety": ["@amanda/safety@workspace:packages/safety"],
+    "@arachne/safety": ["@arachne/safety@workspace:packages/safety"],
 
-    "@amanda/shared": ["@amanda/shared@workspace:packages/shared"],
+    "@arachne/shared": ["@arachne/shared@workspace:packages/shared"],
 
-    "@amanda/skills": ["@amanda/skills@workspace:packages/skills"],
+    "@arachne/skills": ["@arachne/skills@workspace:packages/skills"],
 
-    "@amanda/spdd": ["@amanda/spdd@workspace:packages/spdd"],
+    "@arachne/spdd": ["@arachne/spdd@workspace:packages/spdd"],
 
-    "@amanda/web": ["@amanda/web@workspace:packages/web"],
+    "@arachne/web": ["@arachne/web@workspace:packages/web"],
 
     "@opencode-ai/plugin": ["@opencode-ai/plugin@1.2.6", "", { "dependencies": { "@opencode-ai/sdk": "1.2.6", "zod": "4.1.8" } }, "sha512-CJEp3k17yWsjyfivm3zQof8L42pdze3a7iTqMOyesHgJplSuLiBYAMndbBYMDuJkyAh0dHYjw8v10vVw7Kfl4Q=="],
 
