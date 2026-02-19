@@ -1,9 +1,26 @@
 import { describe, expect, it } from "bun:test"
-import { checkInvariantViolation } from "../../../spdd/src/invariants"
 import {
   NON_EVOLVABLE_PERSONALITY_DIMENSIONS,
   checkPersonalityInvariant,
 } from "../invariants"
+
+interface SpddInvariantsModule {
+  checkInvariantViolation: (
+    originalText: string,
+    modifiedText: string
+  ) => { violated: boolean; violations: string[] }
+}
+
+let spddInvariantsPromise: Promise<SpddInvariantsModule> | null = null
+
+async function loadSpddInvariants(): Promise<SpddInvariantsModule> {
+  if (!spddInvariantsPromise) {
+    const modulePath = ["..", "..", "..", "spdd", "src", "invariants"].join("/")
+    spddInvariantsPromise = import(modulePath) as Promise<SpddInvariantsModule>
+  }
+
+  return spddInvariantsPromise
+}
 
 function makeLegend(overrides?: Partial<Record<string, string>>): string {
   const fields: Record<string, string> = {
@@ -37,7 +54,8 @@ describe("invariants", () => {
     ])
   })
 
-  it("passes when original and proposed legends are identical", () => {
+  it("passes when original and proposed legends are identical", async () => {
+    const { checkInvariantViolation } = await loadSpddInvariants()
     const legend = makeLegend()
 
     const result = checkPersonalityInvariant(legend, legend, {
@@ -113,7 +131,8 @@ describe("invariants", () => {
     expect(result.safe).toBe(true)
   })
 
-  it("integrates SPDD invariant checker violations", () => {
+  it("integrates SPDD invariant checker violations", async () => {
+    const { checkInvariantViolation } = await loadSpddInvariants()
     const original = makeLegend()
     const proposed = makeLegend({
       core_identity: "Arachne remains a precise generalist operator",

@@ -1,0 +1,20 @@
+{
+  "name": "@arachne/integration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@arachne/bootstrap": "workspace:*",
+    "@arachne/budget": "workspace:*",
+    "@arachne/autonomy": "workspace:*",
+    "@arachne/context": "workspace:*",
+    "@arachne/safety": "workspace:*",
+    "@arachne/shared": "workspace:*",
+    "@arachne/skills": "workspace:*",
+    "@arachne/spdd": "workspace:*",
+    "@arachne/web": "workspace:*"
+  }
+}

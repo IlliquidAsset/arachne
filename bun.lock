@@ -35,6 +35,21 @@
         "zod": "^4.3.6",
       },
     },
+    "packages/integration": {
+      "name": "@arachne/integration",
+      "version": "0.1.0",
+      "dependencies": {
+        "@arachne/autonomy": "workspace:*",
+        "@arachne/bootstrap": "workspace:*",
+        "@arachne/budget": "workspace:*",
+        "@arachne/context": "workspace:*",
+        "@arachne/safety": "workspace:*",
+        "@arachne/shared": "workspace:*",
+        "@arachne/skills": "workspace:*",
+        "@arachne/spdd": "workspace:*",
+        "@arachne/web": "workspace:*",
+      },
+    },
     "packages/orchestrator": {
       "name": "@arachne/orchestrator",
       "version": "0.1.0",
@@ -95,6 +110,8 @@
     "@arachne/budget": ["@arachne/budget@workspace:packages/budget"],
 
     "@arachne/context": ["@arachne/context@workspace:packages/context"],
+
+    "@arachne/integration": ["@arachne/integration@workspace:packages/integration"],
 
     "@arachne/orchestrator": ["@arachne/orchestrator@workspace:packages/orchestrator"],
 

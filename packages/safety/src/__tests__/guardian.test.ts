@@ -1,14 +1,40 @@
 import { describe, expect, it } from "bun:test"
-import { isForbidden, isModifiable } from "../../../skills/src/core-whitelist"
-import {
-  MAX_LINES_CHANGED,
-  checkForbiddenOperations,
-} from "../../../skills/src/diff-guard"
 import {
   runSafetyChecks,
   type GuardianDependencies,
   type SafetyOperation,
 } from "../guardian"
+
+interface WhitelistModule {
+  isForbidden: (filePath: string) => boolean
+  isModifiable: (filePath: string) => boolean
+}
+
+interface DiffGuardModule {
+  MAX_LINES_CHANGED: number
+  checkForbiddenOperations: (gitArgs: string | string[]) => { ok: boolean; message: string }
+}
+
+let whitelistModulePromise: Promise<WhitelistModule> | null = null
+let diffGuardModulePromise: Promise<DiffGuardModule> | null = null
+
+async function loadWhitelistModule(): Promise<WhitelistModule> {
+  if (!whitelistModulePromise) {
+    const modulePath = ["..", "..", "..", "skills", "src", "core-whitelist"].join("/")
+    whitelistModulePromise = import(modulePath) as Promise<WhitelistModule>
+  }
+
+  return whitelistModulePromise
+}
+
+async function loadDiffGuardModule(): Promise<DiffGuardModule> {
+  if (!diffGuardModulePromise) {
+    const modulePath = ["..", "..", "..", "skills", "src", "diff-guard"].join("/")
+    diffGuardModulePromise = import(modulePath) as Promise<DiffGuardModule>
+  }
+
+  return diffGuardModulePromise
+}
 
 interface GuardianHarness {
   deps: GuardianDependencies
@@ -22,13 +48,16 @@ interface GuardianHarness {
   getDailyCount: () => number
 }
 
-function createGuardianHarness(overrides?: {
+async function createGuardianHarness(overrides?: {
   killSwitchActive?: boolean
   dailySpend?: number
   weeklySpend?: number
   monthlySpend?: number
   dailyModificationCount?: number
-}): GuardianHarness {
+}): Promise<GuardianHarness> {
+  const whitelistModule = await loadWhitelistModule()
+  const diffGuardModule = await loadDiffGuardModule()
+
   const budgetReads = {
     daily: 0,
     weekly: 0,
@@ -81,12 +110,12 @@ function createGuardianHarness(overrides?: {
     },
     modificationLimitsDeps: {
       whitelist: {
-        isModifiable,
-        isForbidden,
+        isModifiable: whitelistModule.isModifiable,
+        isForbidden: whitelistModule.isForbidden,
       },
       diffGuard: {
-        maxLinesChanged: MAX_LINES_CHANGED,
-        checkForbiddenOperations,
+        maxLinesChanged: diffGuardModule.MAX_LINES_CHANGED,
+        checkForbiddenOperations: diffGuardModule.checkForbiddenOperations,
       },
       counter: {
         getDailyCount: async () => dailyCount,
@@ -133,7 +162,7 @@ function safeOperation(overrides?: Partial<SafetyOperation>): SafetyOperation {
 
 describe("guardian", () => {
   it("blocks immediately when kill switch is active", async () => {
-    const harness = createGuardianHarness({ killSwitchActive: true })
+    const harness = await createGuardianHarness({ killSwitchActive: true })
     const result = await runSafetyChecks(safeOperation(), harness.deps)
 
     expect(result.allowed).toBe(false)
@@ -141,7 +170,7 @@ describe("guardian", () => {
   })
 
   it("short-circuits before budget checks when kill switch is active", async () => {
-    const harness = createGuardianHarness({ killSwitchActive: true })
+    const harness = await createGuardianHarness({ killSwitchActive: true })
 
     await runSafetyChecks(safeOperation(), harness.deps)
 
@@ -151,7 +180,7 @@ describe("guardian", () => {
   })
 
   it("blocks when budget cap is reached", async () => {
-    const harness = createGuardianHarness({ dailySpend: 20 })
+    const harness = await createGuardianHarness({ dailySpend: 20 })
     const result = await runSafetyChecks(safeOperation(), harness.deps)
 
     expect(result.allowed).toBe(false)
@@ -160,7 +189,7 @@ describe("guardian", () => {
   })
 
   it("acquires rate limit when kill switch and budget checks pass", async () => {
-    const harness = createGuardianHarness()
+    const harness = await createGuardianHarness()
 
     const result = await runSafetyChecks(safeOperation(), harness.deps)
 
@@ -169,7 +198,7 @@ describe("guardian", () => {
   })
 
   it("returns a release function for rate-limited allowed operations", async () => {
-    const harness = createGuardianHarness()
+    const harness = await createGuardianHarness()
     const result = await runSafetyChecks(safeOperation(), harness.deps)
 
     expect(result.allowed).toBe(true)
@@ -180,7 +209,7 @@ describe("guardian", () => {
   })
 
   it("blocks when modification limits fail", async () => {
-    const harness = createGuardianHarness()
+    const harness = await createGuardianHarness()
     const result = await runSafetyChecks(
       safeOperation({
         modificationInput: {
@@ -197,7 +226,7 @@ describe("guardian", () => {
   })
 
   it("releases already acquired rate slot when modification checks fail", async () => {
-    const harness = createGuardianHarness()
+    const harness = await createGuardianHarness()
 
     await runSafetyChecks(
       safeOperation({
@@ -215,7 +244,7 @@ describe("guardian", () => {
   })
 
   it("increments daily modification count on successful guarded modification", async () => {
-    const harness = createGuardianHarness({ dailyModificationCount: 2 })
+    const harness = await createGuardianHarness({ dailyModificationCount: 2 })
     const result = await runSafetyChecks(safeOperation(), harness.deps)
 
     expect(result.allowed).toBe(true)
@@ -223,7 +252,7 @@ describe("guardian", () => {
   })
 
   it("allows non-modification operations while still enforcing kill/budget/rate", async () => {
-    const harness = createGuardianHarness()
+    const harness = await createGuardianHarness()
 
     const result = await runSafetyChecks(
       {
