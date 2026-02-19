@@ -15,7 +15,7 @@ interface DetectRoleOptions {
 type ScoreTable = Record<Role, number>;
 
 const ROLE_PRIORITY: Role[] = ["work", "dad", "husband", "general"];
-const WORK_PROJECT_KEYWORDS = ["amanda", "northstarpro", "watserface"];
+const WORK_PROJECT_KEYWORDS = ["arachne", "northstarpro", "watserface"];
 const DAD_KEYWORDS = ["scarlett", "daughter", "kids"];
 const HUSBAND_KEYWORDS = ["samantha", "wife", "dinner"];
 const WORK_KEYWORDS = [

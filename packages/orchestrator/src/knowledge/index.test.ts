@@ -22,30 +22,30 @@ describe("knowledge store", () => {
 
   test("getProfile returns stored profile after buildAllProfiles", async () => {
     await buildAllProfiles([
-      { id: "amanda-orchestrator", absolutePath: PACKAGE_ROOT },
+      { id: "arachne-orchestrator", absolutePath: PACKAGE_ROOT },
     ])
-    const profile = getProfile("amanda-orchestrator")
+    const profile = getProfile("arachne-orchestrator")
     expect(profile).toBeDefined()
-    expect(profile!.projectId).toBe("amanda-orchestrator")
-    expect(profile!.name).toBe("@amanda/orchestrator")
+    expect(profile!.projectId).toBe("arachne-orchestrator")
+    expect(profile!.name).toBe("@arachne/orchestrator")
   })
 
   test("getAllProfiles returns all stored profiles", async () => {
     await buildAllProfiles([
-      { id: "amanda-orchestrator", absolutePath: PACKAGE_ROOT },
+      { id: "arachne-orchestrator", absolutePath: PACKAGE_ROOT },
     ])
     const all = getAllProfiles()
     expect(all.length).toBeGreaterThanOrEqual(1)
-    expect(all[0].projectId).toBe("amanda-orchestrator")
+    expect(all[0].projectId).toBe("arachne-orchestrator")
   })
 
   test("getRoutingContext returns formatted string with all projects", async () => {
     await buildAllProfiles([
-      { id: "amanda-orchestrator", absolutePath: PACKAGE_ROOT },
+      { id: "arachne-orchestrator", absolutePath: PACKAGE_ROOT },
     ])
     const ctx = getRoutingContext()
     expect(ctx).toContain("Projects:")
-    expect(ctx).toContain("amanda-orchestrator")
+    expect(ctx).toContain("arachne-orchestrator")
     expect(ctx).toContain("Stack:")
   })
 
@@ -56,7 +56,7 @@ describe("knowledge store", () => {
 
   test("clearProfiles empties the store", async () => {
     await buildAllProfiles([
-      { id: "amanda-orchestrator", absolutePath: PACKAGE_ROOT },
+      { id: "arachne-orchestrator", absolutePath: PACKAGE_ROOT },
     ])
     expect(getAllProfiles().length).toBeGreaterThan(0)
     clearProfiles()

@@ -18,7 +18,7 @@ describe("helpers", () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), "amanda-helpers-test-"));
+    tempDir = mkdtempSync(join(tmpdir(), "arachne-helpers-test-"));
     initDb({ dbPath: join(tempDir, "test.db") });
   });
 
@@ -93,7 +93,7 @@ describe("helpers", () => {
 
   describe("budget records", () => {
     it("recordBudget inserts a complete record", () => {
-      recordBudget("anthropic", "claude-4-opus", "2026-02-18", 1000, 500, 0.05, "amanda");
+      recordBudget("anthropic", "claude-4-opus", "2026-02-18", 1000, 500, 0.05, "arachne");
 
       const db = getDb();
       const row = db.prepare("SELECT * FROM budget_records").get() as Record<string, unknown>;
@@ -103,7 +103,7 @@ describe("helpers", () => {
       expect(row.tokens_input).toBe(1000);
       expect(row.tokens_output).toBe(500);
       expect(row.estimated_cost_usd).toBe(0.05);
-      expect(row.project).toBe("amanda");
+      expect(row.project).toBe("arachne");
     });
 
     it("recordBudget works without optional project", () => {

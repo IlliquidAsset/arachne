@@ -1,18 +1,18 @@
 import { describe, it, expect } from "bun:test";
 import {
-  AmandaGlobalConfigSchema,
+  ArachneGlobalConfigSchema,
   ServicesRegistrySchema,
-  type AmandaGlobalConfig,
+  type ArachneGlobalConfig,
   type ServicesRegistry,
 } from "../config-schema.js";
 
 describe("config-schema", () => {
-  describe("AmandaGlobalConfigSchema", () => {
+  describe("ArachneGlobalConfigSchema", () => {
     it("validates a complete valid config", () => {
-      const config: AmandaGlobalConfig = {
+      const config: ArachneGlobalConfig = {
         ports: { web: 3100, voice: 8090 },
         paths: {
-          db: "~/.config/amanda/amanda.db",
+          db: "~/.config/arachne/arachne.db",
           skills: "~/.config/opencode/skills/",
         },
         providers: {
@@ -23,12 +23,12 @@ describe("config-schema", () => {
         features: { voice: false, web: true, autonomy: true },
       };
 
-      const result = AmandaGlobalConfigSchema.safeParse(config);
+      const result = ArachneGlobalConfigSchema.safeParse(config);
       expect(result.success).toBe(true);
     });
 
     it("applies default values when fields are missing", () => {
-      const result = AmandaGlobalConfigSchema.safeParse({});
+      const result = ArachneGlobalConfigSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.ports.web).toBe(3100);
@@ -36,12 +36,12 @@ describe("config-schema", () => {
         expect(result.data.features.voice).toBe(false);
         expect(result.data.features.web).toBe(true);
         expect(result.data.features.autonomy).toBe(true);
-        expect(result.data.paths.db).toBe("~/.config/amanda/amanda.db");
+        expect(result.data.paths.db).toBe("~/.config/arachne/arachne.db");
       }
     });
 
     it("allows overriding default ports", () => {
-      const result = AmandaGlobalConfigSchema.safeParse({
+      const result = ArachneGlobalConfigSchema.safeParse({
         ports: { web: 4000, voice: 9000 },
       });
       expect(result.success).toBe(true);
@@ -52,7 +52,7 @@ describe("config-schema", () => {
     });
 
     it("allows partial overrides with defaults filling in", () => {
-      const result = AmandaGlobalConfigSchema.safeParse({
+      const result = ArachneGlobalConfigSchema.safeParse({
         features: { voice: true },
       });
       expect(result.success).toBe(true);
@@ -64,14 +64,14 @@ describe("config-schema", () => {
     });
 
     it("rejects invalid port type", () => {
-      const result = AmandaGlobalConfigSchema.safeParse({
+      const result = ArachneGlobalConfigSchema.safeParse({
         ports: { web: "not-a-number", voice: 8090 },
       });
       expect(result.success).toBe(false);
     });
 
     it("allows additional providers", () => {
-      const result = AmandaGlobalConfigSchema.safeParse({
+      const result = ArachneGlobalConfigSchema.safeParse({
         providers: {
           anthropic: { envVar: "ANTHROPIC_API_KEY" },
           xai: { envVar: "XAI_API_KEY" },
@@ -88,7 +88,7 @@ describe("config-schema", () => {
       const services: ServicesRegistry = {
         services: [
           {
-            name: "opencode-amanda",
+            name: "opencode-arachne",
             type: "opencode",
             url: "http://localhost:3100",
             status: "active",

@@ -52,8 +52,8 @@ function createMockDeps(overrides?: Partial<TrackerDependencies>): TrackerDepend
       cost: 0.045,
     }),
     queryByDateRange: (start: string, end: string) => [
-      { provider: "anthropic", model: "claude-sonnet-4-20250514", input_tokens: 3000, output_tokens: 1000, estimated_cost: 0.024, project: "amanda", timestamp: "2025-02-18T10:00:00Z" },
-      { provider: "anthropic", model: "claude-sonnet-4-20250514", input_tokens: 2000, output_tokens: 1000, estimated_cost: 0.021, project: "amanda", timestamp: "2025-02-17T14:00:00Z" },
+      { provider: "anthropic", model: "claude-sonnet-4-20250514", input_tokens: 3000, output_tokens: 1000, estimated_cost: 0.024, project: "arachne", timestamp: "2025-02-18T10:00:00Z" },
+      { provider: "anthropic", model: "claude-sonnet-4-20250514", input_tokens: 2000, output_tokens: 1000, estimated_cost: 0.021, project: "arachne", timestamp: "2025-02-17T14:00:00Z" },
       { provider: "anthropic", model: "claude-opus-4-20250514", input_tokens: 3000, output_tokens: 1500, estimated_cost: 0.1575, project: "sideproject", timestamp: "2025-02-18T09:00:00Z" },
       { provider: "xai", model: "grok-3", input_tokens: 2000, output_tokens: 800, estimated_cost: 0.018, project: null, timestamp: "2025-02-16T08:00:00Z" },
     ],
@@ -220,10 +220,10 @@ describe("tracker", () => {
       const deps = createMockDeps();
       const breakdown = getProjectBreakdown(deps);
 
-      const amanda = breakdown.find((b) => b.project === "amanda");
-      expect(amanda).toBeDefined();
-      // amanda: 0.024 + 0.021 = 0.045
-      expect(amanda!.totalCost).toBeCloseTo(0.045, 4);
+      const arachne = breakdown.find((b) => b.project === "arachne");
+      expect(arachne).toBeDefined();
+      // arachne: 0.024 + 0.021 = 0.045
+      expect(arachne!.totalCost).toBeCloseTo(0.045, 4);
     });
   });
 });

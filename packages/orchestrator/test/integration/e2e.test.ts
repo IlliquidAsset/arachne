@@ -1,17 +1,17 @@
 import type { PluginInput } from "@opencode-ai/plugin"
-import AmandaOrchestratorPlugin from "../../src/index"
+import ArachneOrchestratorPlugin from "../../src/index"
 
 declare const describe: (name: string, fn: () => void | Promise<void>) => void
 declare const test: (name: string, fn: () => void | Promise<void>) => void
 declare const expect: (value: unknown) => any
 
 const EXPECTED_TOOLS = [
-  "amanda_dispatch",
-  "amanda_projects",
-  "amanda_project_status",
-  "amanda_server_control",
-  "amanda_sessions",
-  "amanda_abort",
+  "arachne_dispatch",
+  "arachne_projects",
+  "arachne_project_status",
+  "arachne_server_control",
+  "arachne_sessions",
+  "arachne_abort",
 ] as const
 
 const pluginCtx: PluginInput = {
@@ -36,7 +36,7 @@ const toolCtx = {
 
 describe("integration: e2e lifecycle", () => {
   test("discovers projects and exposes lifecycle tools", async () => {
-    const hooks = await AmandaOrchestratorPlugin(pluginCtx)
+    const hooks = await ArachneOrchestratorPlugin(pluginCtx)
     const toolNames = Object.keys(hooks.tool ?? {})
 
     expect(toolNames).toHaveLength(6)
@@ -44,12 +44,12 @@ describe("integration: e2e lifecycle", () => {
       expect(toolNames).toContain(name)
     }
 
-    const projectsOutput = await hooks.tool!.amanda_projects.execute({}, toolCtx)
+    const projectsOutput = await hooks.tool!.arachne_projects.execute({}, toolCtx)
     expect(projectsOutput).toContain("northstarpro")
     expect(projectsOutput).toContain("watserface")
     expect(projectsOutput).toContain("oh-my-opencode")
 
-    const statusOutput = await hooks.tool!.amanda_project_status.execute(
+    const statusOutput = await hooks.tool!.arachne_project_status.execute(
       { project: "northstarpro" },
       toolCtx,
     )

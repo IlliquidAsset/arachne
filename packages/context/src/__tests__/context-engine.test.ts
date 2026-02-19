@@ -16,7 +16,7 @@ describe("context-engine", () => {
   it("returns a unified current context object", () => {
     const context = getCurrentContext({
       time: new Date(2026, 1, 17, 10, 0, 0),
-      activeProject: "amanda",
+      activeProject: "arachne",
     });
 
     expect(context.role).toBe("work");

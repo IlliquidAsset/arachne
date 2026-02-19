@@ -45,8 +45,8 @@ describe("storeApiKey / loadApiKey", () => {
   test("round-trips a key through store and load", () => {
     const { ops } = createMockFs()
     const key = generateApiKey()
-    const dir = "/mock/.config/amanda"
-    const file = "/mock/.config/amanda/auth.json"
+    const dir = "/mock/.config/arachne"
+    const file = "/mock/.config/arachne/auth.json"
 
     storeApiKey(key, ops, dir, file)
     const loaded = loadApiKey(ops, file)
@@ -56,8 +56,8 @@ describe("storeApiKey / loadApiKey", () => {
 
   test("creates directory and sets chmod 600", () => {
     const { ops, modes, dirs } = createMockFs()
-    const dir = "/mock/.config/amanda"
-    const file = "/mock/.config/amanda/auth.json"
+    const dir = "/mock/.config/arachne"
+    const file = "/mock/.config/arachne/auth.json"
 
     storeApiKey("test-key", ops, dir, file)
 
@@ -67,9 +67,9 @@ describe("storeApiKey / loadApiKey", () => {
 
   test("stores key with createdAt timestamp", () => {
     const { ops, files } = createMockFs()
-    const file = "/mock/.config/amanda/auth.json"
+    const file = "/mock/.config/arachne/auth.json"
 
-    storeApiKey("test-key", ops, "/mock/.config/amanda", file)
+    storeApiKey("test-key", ops, "/mock/.config/arachne", file)
 
     const stored = JSON.parse(files.get(file)!)
     expect(stored.apiKey).toBe("test-key")

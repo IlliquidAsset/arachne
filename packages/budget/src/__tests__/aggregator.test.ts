@@ -25,7 +25,7 @@ describe("aggregator", () => {
       input_tokens: 1000,
       output_tokens: 500,
       estimated_cost: 0.0105,
-      project: "amanda",
+      project: "arachne",
       timestamp: "2025-02-18T10:00:00.000Z",
     });
     db.insert({
@@ -34,7 +34,7 @@ describe("aggregator", () => {
       input_tokens: 2000,
       output_tokens: 1000,
       estimated_cost: 0.021,
-      project: "amanda",
+      project: "arachne",
       timestamp: "2025-02-18T14:00:00.000Z",
     });
     db.insert({
@@ -54,7 +54,7 @@ describe("aggregator", () => {
       input_tokens: 3000,
       output_tokens: 1500,
       estimated_cost: 0.1575,
-      project: "amanda",
+      project: "arachne",
       timestamp: "2025-02-19T09:00:00.000Z",
     });
     db.insert({

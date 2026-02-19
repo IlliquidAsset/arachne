@@ -1,2 +1,2 @@
-// @amanda/web - web interface
+// @arachne/web - web interface
 export {};

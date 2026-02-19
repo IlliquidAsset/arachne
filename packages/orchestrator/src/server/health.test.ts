@@ -26,7 +26,7 @@ describe("ServerHealthChecker", () => {
   let registry: ServerRegistry
 
   beforeEach(() => {
-    fixtureDir = mkdtempSync(join(tmpdir(), "amanda-server-health-"))
+    fixtureDir = mkdtempSync(join(tmpdir(), "arachne-server-health-"))
     persistencePath = join(fixtureDir, "servers.json")
     registry = new ServerRegistry(persistencePath)
   })

@@ -74,8 +74,8 @@ export class SkillCurator {
 			content,
 		})
 
-		// Write to user scope: ~/.config/opencode/skills/amanda-{name}/SKILL.md
-		const dirPath = `${this.deps.homeDir}/.config/opencode/skills/amanda-${name}`
+		// Write to user scope: ~/.config/opencode/skills/arachne-{name}/SKILL.md
+		const dirPath = `${this.deps.homeDir}/.config/opencode/skills/arachne-${name}`
 		const filePath = `${dirPath}/SKILL.md`
 
 		await this.deps.mkdir(dirPath)
@@ -156,7 +156,6 @@ export class SkillCurator {
 			throw new Error(`Skill "${name}" not found`)
 		}
 
-		// Remove the parent directory (e.g. ~/.config/opencode/skills/amanda-name/)
 		const dirPath = existing.path.replace(/\/SKILL\.md$/, "")
 		await this.deps.rmdir(dirPath)
 

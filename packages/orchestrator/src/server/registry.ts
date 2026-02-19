@@ -74,7 +74,7 @@ function fromPersisted(data: unknown): ServerInfo | null {
 }
 
 function getDefaultRegistryPath(): string {
-  return join(homedir(), ".config", "amanda", "servers.json")
+  return join(homedir(), ".config", "arachne", "servers.json")
 }
 
 export class ServerRegistry {

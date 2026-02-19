@@ -1,5 +1,5 @@
 {
-  "name": "@amanda/orchestrator",
+  "name": "@arachne/orchestrator",
   "version": "0.1.0",
   "description": "Amanda orchestrator plugin for OpenCode",
   "main": "dist/index.js",

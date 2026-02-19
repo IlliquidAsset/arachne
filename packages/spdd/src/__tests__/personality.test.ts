@@ -6,7 +6,7 @@ import {
   getCalibrationMarkers,
   getWorkModePrompt,
   getSocialModePrompt,
-  composeAmandaIdentity,
+  composePersonaIdentity,
 } from "../personality"
 
 const FIXTURE_PATH = join(import.meta.dir, "fixtures", "test-legend.md")
@@ -57,17 +57,17 @@ describe("getSocialModePrompt", () => {
   })
 })
 
-describe("composeAmandaIdentity", () => {
+describe("composePersonaIdentity", () => {
   it("includes Prometheus methodology", () => {
     const legend = loadLegend(FIXTURE_PATH)
-    const identity = composeAmandaIdentity(legend)
+    const identity = composePersonaIdentity(legend)
     expect(identity).toContain("Prometheus")
     expect(identity).toContain("Amanda")
   })
 
   it("includes personality quick reference", () => {
     const legend = loadLegend(FIXTURE_PATH)
-    const identity = composeAmandaIdentity(legend)
+    const identity = composePersonaIdentity(legend)
     expect(identity).toContain("Principles")
     expect(identity).toContain("legibility")
   })

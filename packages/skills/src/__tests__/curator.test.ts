@@ -80,7 +80,7 @@ describe("SkillCurator", () => {
 			expect(skill.frontmatter.tools).toEqual(["tool1"])
 
 			//#then writes to correct path
-			const expectedDir = "/mock/home/.config/opencode/skills/amanda-my-new-skill"
+			const expectedDir = "/mock/home/.config/opencode/skills/arachne-my-new-skill"
 			expect(fs.dirs).toContain(expectedDir)
 			const writtenPath = `${expectedDir}/SKILL.md`
 			expect(fs.written[writtenPath]).toBeDefined()
@@ -133,7 +133,7 @@ describe("SkillCurator", () => {
 		it("reads existing skill and applies content changes", async () => {
 			const existingSkill: SkillInfo = {
 				name: "existing-skill",
-				path: "/mock/home/.config/opencode/skills/amanda-existing-skill/SKILL.md",
+				path: "/mock/home/.config/opencode/skills/arachne-existing-skill/SKILL.md",
 				scope: "user",
 				frontmatter: { name: "existing-skill", description: "An existing skill" },
 				content: "Old content.",
@@ -161,7 +161,7 @@ describe("SkillCurator", () => {
 		it("merges frontmatter changes", async () => {
 			const existingSkill: SkillInfo = {
 				name: "existing-skill",
-				path: "/mock/home/.config/opencode/skills/amanda-existing-skill/SKILL.md",
+				path: "/mock/home/.config/opencode/skills/arachne-existing-skill/SKILL.md",
 				scope: "user",
 				frontmatter: { name: "existing-skill", description: "Old desc" },
 				content: "Content.",
@@ -235,7 +235,7 @@ describe("SkillCurator", () => {
 		it("removes skill directory", async () => {
 			const existingSkill: SkillInfo = {
 				name: "doomed-skill",
-				path: "/mock/home/.config/opencode/skills/amanda-doomed-skill/SKILL.md",
+				path: "/mock/home/.config/opencode/skills/arachne-doomed-skill/SKILL.md",
 				scope: "user",
 				frontmatter: { name: "doomed-skill", description: "Going away" },
 				content: "Goodbye.",
@@ -254,7 +254,7 @@ describe("SkillCurator", () => {
 
 			//#then directory is removed
 			expect(fs.removed.length).toBeGreaterThan(0)
-			expect(fs.removed[0]).toContain("amanda-doomed-skill")
+			expect(fs.removed[0]).toContain("arachne-doomed-skill")
 		})
 
 		//#when deleting non-existent skill

@@ -3,10 +3,10 @@ import type { OpencodeClient } from "@opencode-ai/sdk"
 import { DispatchTracker } from "./tracker"
 import { createDispatch } from "./dispatch"
 import type { DispatchDependencies } from "./dispatch"
-import type { AmandaConfig } from "../config"
+import type { ArachneConfig } from "../config"
 import type { DispatchRecord } from "./types"
 
-const baseConfig: AmandaConfig = {
+const baseConfig: ArachneConfig = {
   discovery: {
     paths: [],
     ignore: ["node_modules", ".git", "dist", ".next", ".cache"],
@@ -22,6 +22,26 @@ const baseConfig: AmandaConfig = {
   dispatch: {
     maxConcurrent: 2,
     timeout: 300000,
+  },
+  voice: {
+    enabled: false,
+    port: 8090,
+    whisper: {
+      binaryPath: "whisper-server",
+      modelPath: "~/.config/arachne/models/ggml-large-v3-turbo.bin",
+      serverPort: 9000,
+      language: "en",
+      useCoreML: true,
+    },
+    tts: {
+      engine: "kokoro",
+      voiceId: "af_heart",
+      sampleRate: 24000,
+    },
+    vad: {
+      silenceThreshold: 640,
+    },
+    maxConcurrentSessions: 1,
   },
 }
 

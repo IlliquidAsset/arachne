@@ -1,4 +1,4 @@
-// @amanda/skills - skill curation engine
+// @arachne/skills - skill curation engine
 
 // Types
 export type {

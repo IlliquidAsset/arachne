@@ -1,1 +1,3 @@
 await new Promise(() => {});
+
+export {};

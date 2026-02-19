@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 
 const DEFAULT_PORTS = { web: 3100, voice: 8090 } as const;
 const DEFAULT_PATHS = {
-  db: "~/.config/amanda/amanda.db",
+  db: "~/.config/arachne/arachne.db",
   skills: "~/.config/opencode/skills/",
 } as const;
 const DEFAULT_PROVIDERS = {
@@ -36,14 +36,14 @@ const FeaturesSchema = z.object({
   autonomy: z.boolean().default(DEFAULT_FEATURES.autonomy),
 }).default({ ...DEFAULT_FEATURES });
 
-export const AmandaGlobalConfigSchema = z.object({
+export const ArachneGlobalConfigSchema = z.object({
   ports: PortsSchema,
   paths: PathsSchema,
   providers: ProvidersSchema,
   features: FeaturesSchema,
 });
 
-export type AmandaGlobalConfig = z.infer<typeof AmandaGlobalConfigSchema>;
+export type ArachneGlobalConfig = z.infer<typeof ArachneGlobalConfigSchema>;
 
 const ServiceEntrySchema = z.object({
   name: z.string(),

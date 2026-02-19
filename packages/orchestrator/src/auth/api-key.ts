@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync, chmodSync } from "node:fs"
 import { join } from "node:path"
 import { homedir } from "node:os"
 
-const AUTH_DIR = join(homedir(), ".config", "amanda")
+const AUTH_DIR = join(homedir(), ".config", "arachne")
 const AUTH_FILE = join(AUTH_DIR, "auth.json")
 
 export interface ApiKeyFileOperations {
@@ -28,7 +28,7 @@ export function generateApiKey(): string {
 }
 
 /**
- * Store an API key to ~/.config/amanda/auth.json with chmod 600.
+ * Store an API key to ~/.config/arachne/auth.json with chmod 600.
  */
 export function storeApiKey(
   key: string,
@@ -43,7 +43,7 @@ export function storeApiKey(
 }
 
 /**
- * Load an API key from ~/.config/amanda/auth.json.
+ * Load an API key from ~/.config/arachne/auth.json.
  * Returns null if the file doesn't exist or is malformed.
  */
 export function loadApiKey(

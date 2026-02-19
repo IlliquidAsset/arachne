@@ -1,2 +1,2 @@
-export { AmandaConfigSchema, type AmandaConfig } from "./schema"
-export { loadAmandaConfig } from "./loader"
+export { ArachneConfigSchema, type ArachneConfig } from "./schema"
+export { loadArachneConfig } from "./loader"

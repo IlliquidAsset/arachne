@@ -73,6 +73,9 @@
     "packages/spdd": {
       "name": "@amanda/spdd",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
     },
     "packages/web": {
       "name": "@amanda/web",

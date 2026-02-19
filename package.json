@@ -1,8 +1,8 @@
 {
-  "name": "amanda",
+  "name": "arachne",
   "version": "0.1.0",
   "private": true,
-  "description": "Amanda - AI assistant hybrid monorepo",
+  "description": "Arachne - AI assistant hybrid monorepo",
   "workspaces": ["packages/*"],
   "scripts": {
     "build": "tsc --build",

@@ -1,7 +1,7 @@
 /**
  * DB interface for budget tracking.
  * Defines the contract for SQLite operations.
- * In production, this will be wired to @amanda/shared's DB.
+ * In production, this will be wired to @arachne/shared's DB.
  * For testing, an in-memory implementation is provided.
  */
 

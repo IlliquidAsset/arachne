@@ -21,7 +21,7 @@ async function writeProjectFixtures(): Promise<void> {
   tempRoot = await mkdtemp(join(tmpdir(), "router-test-"))
   northstarPath = join(tempRoot, "northstarpro")
   watserfacePath = join(tempRoot, "watserface")
-  orchestratorPath = join(tempRoot, "amanda-orchestrator")
+  orchestratorPath = join(tempRoot, "arachne-orchestrator")
 
   await Promise.all([
     mkdir(northstarPath, { recursive: true }),
@@ -51,7 +51,7 @@ async function writeProjectFixtures(): Promise<void> {
     writeFile(
       join(orchestratorPath, "package.json"),
       JSON.stringify({
-        name: "amanda-orchestrator",
+        name: "arachne-orchestrator",
       }),
     ),
   ])
@@ -83,7 +83,7 @@ async function writeProjectFixtures(): Promise<void> {
     ),
     writeFile(
       join(orchestratorPath, "AGENTS.md"),
-      ["# Amanda Orchestrator", "", "Control plane for Amanda projects."].join(
+       ["# Arachne Orchestrator", "", "Control plane for Arachne projects."].join(
         "\n",
       ),
     ),
@@ -107,8 +107,8 @@ function registerProjects(): void {
     state: "discovered",
   })
   projectRegistry.register({
-    id: "amanda-orchestrator",
-    name: "amanda-orchestrator",
+    id: "arachne-orchestrator",
+    name: "arachne-orchestrator",
     absolutePath: orchestratorPath,
     detectedFiles: ["package.json"],
     state: "discovered",
@@ -127,7 +127,7 @@ beforeEach(async () => {
   await buildAllProfiles([
     { id: "northstarpro", absolutePath: northstarPath },
     { id: "watserface", absolutePath: watserfacePath },
-    { id: "amanda-orchestrator", absolutePath: orchestratorPath },
+    { id: "arachne-orchestrator", absolutePath: orchestratorPath },
   ])
 })
 
@@ -216,7 +216,7 @@ describe("routeMessage", () => {
     expect(result.confidence).toBe("ask_user")
     expect(result.layer).toBe(5)
     expect(result.candidates).toEqual([
-      "amanda-orchestrator",
+      "arachne-orchestrator",
       "northstarpro",
       "watserface",
     ])

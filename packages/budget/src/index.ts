@@ -1,4 +1,4 @@
-// @amanda/budget — token counting engine with pricing, aggregation, and budget tracking
+// @arachne/budget — token counting engine with pricing, aggregation, and budget tracking
 
 // Pricing table and cost calculation
 export {
@@ -27,7 +27,7 @@ export {
   setAggregatorDB,
 } from "./aggregator";
 
-// DB interface for wiring to @amanda/shared
+// DB interface for wiring to @arachne/shared
 export {
   type BudgetRecord,
   type BudgetDB,

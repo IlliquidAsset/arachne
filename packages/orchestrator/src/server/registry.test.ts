@@ -25,7 +25,7 @@ describe("ServerRegistry", () => {
   let registry: ServerRegistry
 
   beforeEach(() => {
-    fixtureDir = mkdtempSync(join(tmpdir(), "amanda-server-registry-"))
+    fixtureDir = mkdtempSync(join(tmpdir(), "arachne-server-registry-"))
     persistencePath = join(fixtureDir, "servers.json")
     registry = new ServerRegistry(persistencePath)
   })

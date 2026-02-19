@@ -8,6 +8,6 @@ export {
   getCalibrationMarkers,
   getWorkModePrompt,
   getSocialModePrompt,
-  composeAmandaIdentity,
+  composePersonaIdentity,
   type CalibrationMarker,
 } from "./personality"

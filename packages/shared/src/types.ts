@@ -1,5 +1,5 @@
 export type {
-  AmandaGlobalConfig,
+  ArachneGlobalConfig,
   ServicesRegistry,
   ServiceEntry,
 } from "./config-schema.js";

@@ -2,7 +2,7 @@ import { z } from "zod"
 
 const DEFAULT_IGNORE = ["node_modules", ".git", "dist", ".next", ".cache"]
 
-export const AmandaConfigSchema = z.object({
+export const ArachneConfigSchema = z.object({
   discovery: z
     .object({
       paths: z.array(z.string()).default([]),
@@ -34,14 +34,14 @@ export const AmandaConfigSchema = z.object({
       whisper: z
         .object({
           binaryPath: z.string().default("whisper-server"),
-          modelPath: z.string().default("~/.config/amanda/models/ggml-large-v3-turbo.bin"),
+          modelPath: z.string().default("~/.config/arachne/models/ggml-large-v3-turbo.bin"),
           serverPort: z.number().min(1).max(65535).default(9000),
           language: z.string().default("en"),
           useCoreML: z.boolean().default(true),
         })
         .default({
           binaryPath: "whisper-server",
-          modelPath: "~/.config/amanda/models/ggml-large-v3-turbo.bin",
+          modelPath: "~/.config/arachne/models/ggml-large-v3-turbo.bin",
           serverPort: 9000,
           language: "en",
           useCoreML: true,
@@ -71,7 +71,7 @@ export const AmandaConfigSchema = z.object({
       port: 8090,
       whisper: {
         binaryPath: "whisper-server",
-        modelPath: "~/.config/amanda/models/ggml-large-v3-turbo.bin",
+        modelPath: "~/.config/arachne/models/ggml-large-v3-turbo.bin",
         serverPort: 9000,
         language: "en",
         useCoreML: true,
@@ -88,5 +88,5 @@ export const AmandaConfigSchema = z.object({
     }),
 })
 
-export type AmandaConfig = z.infer<typeof AmandaConfigSchema>
-export type VoiceConfig = z.infer<typeof AmandaConfigSchema>["voice"]
+export type ArachneConfig = z.infer<typeof ArachneConfigSchema>
+export type VoiceConfig = z.infer<typeof ArachneConfigSchema>["voice"]

@@ -9,7 +9,7 @@ describe("db", () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), "amanda-db-test-"));
+    tempDir = mkdtempSync(join(tmpdir(), "arachne-db-test-"));
   });
 
   afterEach(() => {

@@ -2,7 +2,7 @@ import type { Plugin } from "@opencode-ai/plugin"
 import { tool } from "@opencode-ai/plugin/tool"
 import { dirname } from "node:path"
 import { abortSession, clientPool, listSessions } from "./client"
-import { loadAmandaConfig, type AmandaConfig } from "./config"
+import { loadArachneConfig, type ArachneConfig } from "./config"
 import { dispatch, dispatchTracker, routeMessage } from "./dispatch"
 import { projectRegistry, scanProjects, type ProjectInfo } from "./discovery"
 import { buildAllProfiles, clearProfiles, getProfile } from "./knowledge"
@@ -28,7 +28,7 @@ function toIsoString(value: number): string {
   return date.toISOString()
 }
 
-function getApiKey(config: AmandaConfig): string | undefined {
+function getApiKey(config: ArachneConfig): string | undefined {
   if (!config.auth.enabled) return undefined
   return config.auth.apiKey || undefined
 }
@@ -44,7 +44,7 @@ function resolveProject(projectQuery: string): ProjectInfo {
 
 async function ensureServerRunning(
   projectPath: string,
-  config: AmandaConfig,
+  config: ArachneConfig,
 ): Promise<ServerInfo> {
   const existing = serverRegistry.get(projectPath)
   if (existing && existing.status === "running") {
@@ -80,8 +80,8 @@ function updateProjectState(project: ProjectInfo): void {
   projectRegistry.updateState(project.id, "server-stopped")
 }
 
-const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
-  const config = loadAmandaConfig(ctx.directory)
+const ArachneOrchestratorPlugin: Plugin = async (ctx) => {
+  const config = loadArachneConfig(ctx.directory)
   const configuredRoots = config.discovery.paths.filter(
     (path): path is string => typeof path === "string" && path.trim().length > 0,
   )
@@ -118,9 +118,9 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
 
   return {
     tool: {
-      amanda_dispatch: tool({
+      arachne_dispatch: tool({
         description:
-          "Dispatch a task to an Amanda agent instance in a specific project",
+          "Dispatch a task to an Arachne agent instance in a specific project",
         args: {
           project: tool.schema
             .string()
@@ -178,9 +178,9 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         },
       }),
 
-      amanda_projects: tool({
+      arachne_projects: tool({
         description:
-          "List available Amanda projects and their configurations",
+          "List available Arachne projects and their configurations",
         args: {
           filter: tool.schema
             .string()
@@ -199,7 +199,7 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
           })
 
           if (projects.length === 0) {
-            return "No Amanda projects found."
+            return "No Arachne projects found."
           }
 
           const lines = projects.map((project) => {
@@ -223,8 +223,8 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         },
       }),
 
-      amanda_project_status: tool({
-        description: "Get the status of a specific Amanda project",
+      arachne_project_status: tool({
+        description: "Get the status of a specific Arachne project",
         args: {
           project: tool.schema.string().describe("Project identifier"),
         },
@@ -270,9 +270,9 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         },
       }),
 
-      amanda_server_control: tool({
+      arachne_server_control: tool({
         description:
-          "Control Amanda server instances (start, stop, restart, status)",
+          "Control Arachne server instances (start, stop, restart, status)",
         args: {
           action: tool.schema
             .enum(["start", "stop", "restart", "status"])
@@ -326,8 +326,8 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         },
       }),
 
-      amanda_sessions: tool({
-        description: "List active Amanda sessions for a project",
+      arachne_sessions: tool({
+        description: "List active Arachne sessions for a project",
         args: {
           project: tool.schema.string().describe("Project identifier"),
         },
@@ -367,8 +367,8 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
         },
       }),
 
-      amanda_abort: tool({
-        description: "Abort a running Amanda task or session",
+      arachne_abort: tool({
+        description: "Abort a running Arachne task or session",
         args: {
           project: tool.schema.string().describe("Project identifier"),
           sessionId: tool.schema.string().describe("Session ID to abort"),
@@ -396,4 +396,4 @@ const AmandaOrchestratorPlugin: Plugin = async (ctx) => {
   }
 }
 
-export default AmandaOrchestratorPlugin
+export default ArachneOrchestratorPlugin

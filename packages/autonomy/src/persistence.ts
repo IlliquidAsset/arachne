@@ -11,7 +11,7 @@ export interface WorkflowRunRecord {
 
 /**
  * Persistence interface for workflow registry.
- * In-memory impl now; SQLite via @amanda/shared later.
+ * In-memory impl now; SQLite via @arachne/shared later.
  */
 export interface WorkflowPersistence {
   save(workflow: Workflow): void;

@@ -1,2 +1,2 @@
-// @amanda/safety - safety guardrails
+// @arachne/safety - safety guardrails
 export {};

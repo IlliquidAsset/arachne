@@ -108,9 +108,9 @@ describe("token-counter", () => {
         "claude-opus-4-20250514",
         500,
         200,
-        "amanda-core"
+        "arachne-core"
       );
-      expect(event.project).toBe("amanda-core");
+      expect(event.project).toBe("arachne-core");
     });
 
     it("sets timestamp as ISO string", () => {

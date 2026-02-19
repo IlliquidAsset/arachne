@@ -9,7 +9,7 @@ export interface DatabaseDependencies {
   migrationsDir?: string;
 }
 
-const DEFAULT_DB_PATH = join(homedir(), ".config", "amanda", "amanda.db");
+const DEFAULT_DB_PATH = join(homedir(), ".config", "arachne", "arachne.db");
 
 let _db: Database | null = null;
 

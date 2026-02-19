@@ -1,2 +1,2 @@
-// @amanda/bootstrap - bootstrapping and initialization
+// @arachne/bootstrap - bootstrapping and initialization
 export {};

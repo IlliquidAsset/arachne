@@ -3,7 +3,7 @@ import { scanProjects } from "./scanner"
 import { mkdirSync, writeFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
-const TEST_BASE = join("/tmp", `amanda-scanner-test-${Date.now()}`)
+const TEST_BASE = join("/tmp", `arachne-scanner-test-${Date.now()}`)
 
 function mkDir(...parts: string[]) {
   mkdirSync(join(TEST_BASE, ...parts), { recursive: true })

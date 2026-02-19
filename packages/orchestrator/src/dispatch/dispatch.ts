@@ -6,7 +6,7 @@ import {
   sendMessageAsync,
 } from "../client/operations"
 import type { SessionInfo } from "../client/types"
-import { loadAmandaConfig, type AmandaConfig } from "../config"
+import { loadArachneConfig, type ArachneConfig } from "../config"
 import { projectRegistry, type ProjectRegistry } from "../discovery/registry"
 import { startServer } from "../server/lifecycle"
 import { serverRegistry, type ServerRegistry } from "../server/registry"
@@ -37,7 +37,7 @@ function toErrorMessage(error: unknown): string {
   return String(error)
 }
 
-function getApiKey(config: AmandaConfig): string | undefined {
+function getApiKey(config: ArachneConfig): string | undefined {
   if (!config.auth.enabled) return undefined
   return config.auth.apiKey || undefined
 }
@@ -102,9 +102,9 @@ export function createDispatch(dependencies: DispatchDependencies) {
     projectName: string,
     message: string,
     opts?: DispatchOptions,
-    config?: AmandaConfig,
+    config?: ArachneConfig,
   ): Promise<DispatchResult> {
-    const resolvedConfig = config ?? loadAmandaConfig(process.cwd())
+    const resolvedConfig = config ?? loadArachneConfig(process.cwd())
     const project = resolveProject(dependencies.projects, projectName)
 
     if (

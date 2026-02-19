@@ -1,9 +1,9 @@
 import { describe, test, expect } from "bun:test"
-import { AmandaConfigSchema } from "./schema"
+import { ArachneConfigSchema } from "./schema"
 
-describe("AmandaConfigSchema", () => {
+describe("ArachneConfigSchema", () => {
   test("applies all defaults when given empty object", () => {
-    const config = AmandaConfigSchema.parse({})
+    const config = ArachneConfigSchema.parse({})
 
     expect(config.discovery.paths).toEqual([])
     expect(config.discovery.ignore).toEqual([
@@ -22,7 +22,7 @@ describe("AmandaConfigSchema", () => {
   })
 
   test("accepts valid custom config", () => {
-    const config = AmandaConfigSchema.parse({
+    const config = ArachneConfigSchema.parse({
       discovery: { paths: ["/projects"], ignore: ["node_modules"] },
       servers: { portRange: [5000, 5100], autoStart: false },
       auth: { apiKey: "test-key", enabled: false },
@@ -41,24 +41,24 @@ describe("AmandaConfigSchema", () => {
 
   test("rejects invalid types", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ dispatch: { maxConcurrent: "not-a-number" } }),
+      ArachneConfigSchema.parse({ dispatch: { maxConcurrent: "not-a-number" } }),
     ).toThrow()
   })
 
   test("rejects invalid port range tuple", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ servers: { portRange: [4100] } }),
+      ArachneConfigSchema.parse({ servers: { portRange: [4100] } }),
     ).toThrow()
   })
 
   test("rejects invalid enum-like values in nested fields", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ auth: { enabled: "yes" } }),
+      ArachneConfigSchema.parse({ auth: { enabled: "yes" } }),
     ).toThrow()
   })
 
   test("merges partial config with defaults", () => {
-    const config = AmandaConfigSchema.parse({
+    const config = ArachneConfigSchema.parse({
       dispatch: { maxConcurrent: 10 },
     })
 
@@ -69,7 +69,7 @@ describe("AmandaConfigSchema", () => {
   })
 
   test("merges partial nested section with defaults", () => {
-    const config = AmandaConfigSchema.parse({
+    const config = ArachneConfigSchema.parse({
       servers: { autoStart: false },
     })
 
@@ -78,12 +78,12 @@ describe("AmandaConfigSchema", () => {
   })
 
   test("applies voice defaults when no voice section provided", () => {
-    const config = AmandaConfigSchema.parse({})
+    const config = ArachneConfigSchema.parse({})
 
     expect(config.voice.enabled).toBe(false)
     expect(config.voice.port).toBe(8090)
     expect(config.voice.whisper.binaryPath).toBe("whisper-server")
-    expect(config.voice.whisper.modelPath).toBe("~/.config/amanda/models/ggml-large-v3-turbo.bin")
+    expect(config.voice.whisper.modelPath).toBe("~/.config/arachne/models/ggml-large-v3-turbo.bin")
     expect(config.voice.whisper.serverPort).toBe(9000)
     expect(config.voice.whisper.language).toBe("en")
     expect(config.voice.whisper.useCoreML).toBe(true)
@@ -95,7 +95,7 @@ describe("AmandaConfigSchema", () => {
   })
 
   test("accepts valid custom voice config", () => {
-    const config = AmandaConfigSchema.parse({
+    const config = ArachneConfigSchema.parse({
       voice: {
         enabled: true,
         port: 8091,
@@ -134,36 +134,36 @@ describe("AmandaConfigSchema", () => {
 
   test("rejects invalid voice port (negative)", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ voice: { port: -1 } }),
+      ArachneConfigSchema.parse({ voice: { port: -1 } }),
     ).toThrow()
   })
 
   test("rejects invalid voice port (exceeds max)", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ voice: { port: 65536 } }),
+      ArachneConfigSchema.parse({ voice: { port: 65536 } }),
     ).toThrow()
   })
 
   test("rejects invalid whisper server port", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ voice: { whisper: { serverPort: 0 } } }),
+      ArachneConfigSchema.parse({ voice: { whisper: { serverPort: 0 } } }),
     ).toThrow()
   })
 
   test("rejects invalid tts engine", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ voice: { tts: { engine: "invalid-engine" } } }),
+      ArachneConfigSchema.parse({ voice: { tts: { engine: "invalid-engine" } } }),
     ).toThrow()
   })
 
   test("rejects invalid maxConcurrentSessions (zero)", () => {
     expect(() =>
-      AmandaConfigSchema.parse({ voice: { maxConcurrentSessions: 0 } }),
+      ArachneConfigSchema.parse({ voice: { maxConcurrentSessions: 0 } }),
     ).toThrow()
   })
 
   test("merges partial voice config with defaults", () => {
-    const config = AmandaConfigSchema.parse({
+    const config = ArachneConfigSchema.parse({
       voice: { enabled: true, port: 8095 },
     })
 
@@ -175,7 +175,7 @@ describe("AmandaConfigSchema", () => {
   })
 
   test("maintains backward compatibility with existing config (no voice section)", () => {
-    const config = AmandaConfigSchema.parse({
+    const config = ArachneConfigSchema.parse({
       discovery: { paths: ["/projects"] },
       servers: { portRange: [5000, 5100] },
       auth: { apiKey: "test-key" },

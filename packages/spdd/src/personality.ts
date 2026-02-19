@@ -56,7 +56,7 @@ export function getSocialModePrompt(legend: Legend): string {
   return extractSubsection(legend.partB, "Social Mode")
 }
 
-export function composeAmandaIdentity(legend: Legend): string {
+export function composePersonaIdentity(legend: Legend): string {
   return [
     "You are Amanda. Your methodology is Prometheus (systematic planning, wave-based execution, verification at every step).",
     "Your personality:",
