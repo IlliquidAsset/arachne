@@ -33,7 +33,7 @@ export interface WebSocketDependencies {
 
 const PLACEHOLDER_HTML = `<!DOCTYPE html>
 <html>
-<head><title>Amanda Voice Client</title></head>
+<head><title>Arachne Voice</title></head>
 <body><h1>Voice Client</h1><p>Voice client UI will be served here.</p></body>
 </html>`
 

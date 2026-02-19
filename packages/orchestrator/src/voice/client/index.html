@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arachne Voice</title>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.18/dist/bundle.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --card: #13131a;
+    --card-border: #1e1e2e;
+    --accent: #6366f1;
+    --accent-glow: rgba(99, 102, 241, 0.25);
+    --text: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --green: #22c55e;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  header {
+    text-align: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+  }
+
+  .connection-status {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .connection-status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    transition: background 0.3s;
+  }
+
+  .connection-status.connected .dot { background: var(--green); }
+  .connection-status.connecting .dot { background: var(--yellow); animation: pulse-dot 1s infinite; }
+  .connection-status.disconnected .dot { background: var(--red); }
+
+  .voice-state {
+    color: var(--text-secondary);
+    text-transform: capitalize;
+    transition: color 0.3s;
+  }
+
+  .voice-state.speaking { color: var(--accent); }
+  .voice-state.thinking { color: var(--yellow); }
+  .voice-state.processing { color: var(--yellow); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .card-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .transcription {
+    min-height: 2.5rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .response-text {
+    min-height: 3rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .response-text:empty::after {
+    content: "Waiting for voice input...";
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .mic-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+  }
+
+  .mic-toggle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--card-border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .mic-toggle:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .mic-toggle.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 30px var(--accent-glow);
+  }
+
+  .mic-toggle.active:hover {
+    background: #4f46e5;
+  }
+
+  .mic-toggle.muted {
+    opacity: 0.5;
+    border-color: var(--red);
+  }
+
+  .mic-toggle svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+  }
+
+  .level-ring {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.15s, transform 0.15s;
+    pointer-events: none;
+  }
+
+  .mic-toggle.active .level-ring.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .mic-hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .error-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1a1a2e;
+    border: 1px solid var(--red);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    color: var(--red);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    z-index: 100;
+    max-width: 90vw;
+  }
+
+  .error-toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes pulse-mic {
+    0%, 100% { box-shadow: 0 0 30px var(--accent-glow); }
+    50% { box-shadow: 0 0 50px var(--accent-glow); }
+  }
+
+  .mic-toggle.active.listening {
+    animation: pulse-mic 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Arachne Voice</h1>
+  </header>
+
+  <div class="status-bar">
+    <div class="connection-status disconnected">
+      <span class="dot"></span>
+      <span class="conn-label">Disconnected</span>
+    </div>
+    <div class="voice-state">--</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">You said</div>
+    <div class="transcription"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Response</div>
+    <div class="response-text"></div>
+  </div>
+
+  <div class="mic-area">
+    <button class="mic-toggle" id="micBtn" disabled>
+      <span class="level-ring"></span>
+      <svg viewBox="0 0 24 24" class="mic-icon">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+      <svg viewBox="0 0 24 24" class="mic-off-icon" style="display:none">
+        <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/>
+      </svg>
+    </button>
+    <span class="mic-hint">Click to start</span>
+  </div>
+</div>
+
+<div class="error-toast" id="errorToast"></div>
+
+<script>
+(function() {
+  "use strict";
+
+  // -------------------------------------------------------------------------
+  // DOM refs
+  // -------------------------------------------------------------------------
+  const connStatus = document.querySelector(".connection-status");
+  const connLabel = document.querySelector(".conn-label");
+  const voiceState = document.querySelector(".voice-state");
+  const transcription = document.querySelector(".transcription");
+  const responseText = document.querySelector(".response-text");
+  const micBtn = document.getElementById("micBtn");
+  const micIcon = micBtn.querySelector(".mic-icon");
+  const micOffIcon = micBtn.querySelector(".mic-off-icon");
+  const levelRing = micBtn.querySelector(".level-ring");
+  const micHint = document.querySelector(".mic-hint");
+  const errorToast = document.getElementById("errorToast");
+
+  // -------------------------------------------------------------------------
+  // State
+  // -------------------------------------------------------------------------
+  let ws = null;
+  let vad = null;
+  let audioCtx = null;
+  let isMuted = false;
+  let isActive = false;
+  let reconnectDelay = 1000;
+  let reconnectTimer = null;
+  let playbackQueue = [];
+  let isPlaying = false;
+  let currentSource = null;
+  let errorTimer = null;
+
+  // -------------------------------------------------------------------------
+  // Token from URL
+  // -------------------------------------------------------------------------
+  const params = new URLSearchParams(location.search);
+  const token = params.get("token") || "";
+
+  // -------------------------------------------------------------------------
+  // Connection
+  // -------------------------------------------------------------------------
+  function connect() {
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+    setConnectionState("connecting");
+
+    const proto = location.protocol === "https:" ? "wss:" : "ws:";
+    const url = proto + "//" + location.host + "/?token=" + encodeURIComponent(token);
+
+    ws = new WebSocket(url);
+    ws.binaryType = "arraybuffer";
+
+    ws.onopen = function() {
+      setConnectionState("connected");
+      reconnectDelay = 1000;
+    };
+
+    ws.onclose = function() {
+      setConnectionState("disconnected");
+      scheduleReconnect();
+    };
+
+    ws.onerror = function() {
+      // onclose will fire after this
+    };
+
+    ws.onmessage = function(evt) {
+      if (typeof evt.data === "string") {
+        handleTextMessage(evt.data);
+      } else if (evt.data instanceof ArrayBuffer) {
+        handleAudioChunk(evt.data);
+      }
+    };
+  }
+
+  function sendJSON(obj) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(obj));
+    }
+  }
+
+  function sendBinary(buffer) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(buffer);
+    }
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(function() {
+      connect();
+    }, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+  }
+
+  // -------------------------------------------------------------------------
+  // Connection state UI
+  // -------------------------------------------------------------------------
+  function setConnectionState(state) {
+    connStatus.className = "connection-status " + state;
+    var labels = { disconnected: "Disconnected", connecting: "Connecting...", connected: "Connected" };
+    connLabel.textContent = labels[state] || state;
+    micBtn.disabled = state !== "connected";
+  }
+
+  // -------------------------------------------------------------------------
+  // Voice state UI
+  // -------------------------------------------------------------------------
+  function setVoiceState(state) {
+    voiceState.textContent = state;
+    voiceState.className = "voice-state " + state;
+
+    micBtn.classList.remove("listening");
+    if (state === "listening" && isActive && !isMuted) {
+      micBtn.classList.add("listening");
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Server messages
+  // -------------------------------------------------------------------------
+  function handleTextMessage(raw) {
+    var msg;
+    try { msg = JSON.parse(raw); } catch(e) { return; }
+
+    switch (msg.type) {
+      case "listening":
+        setVoiceState("listening");
+        break;
+      case "processing":
+        setVoiceState("processing");
+        break;
+      case "thinking":
+        setVoiceState("thinking");
+        break;
+      case "speaking":
+        setVoiceState("speaking");
+        break;
+      case "transcription":
+        transcription.textContent = msg.text || "";
+        break;
+      case "response_text":
+        responseText.textContent = msg.text || "";
+        break;
+      case "error":
+        showError(msg.message || "Unknown error");
+        break;
+      case "session_limit":
+        showError("Another voice session is active");
+        break;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Audio playback (Float32 PCM @ 24kHz)
+  // -------------------------------------------------------------------------
+  function ensureAudioCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+    }
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function handleAudioChunk(arrayBuffer) {
+    var float32 = new Float32Array(arrayBuffer);
+    playbackQueue.push(float32);
+    if (!isPlaying) {
+      playNextChunk();
+    }
+  }
+
+  function playNextChunk() {
+    if (playbackQueue.length === 0) {
+      isPlaying = false;
+      currentSource = null;
+      return;
+    }
+
+    isPlaying = true;
+    var ctx = ensureAudioCtx();
+    var chunk = playbackQueue.shift();
+    var buffer = ctx.createBuffer(1, chunk.length, 24000);
+    buffer.getChannelData(0).set(chunk);
+
+    var source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.onended = function() {
+      playNextChunk();
+    };
+    source.start();
+    currentSource = source;
+  }
+
+  function stopPlayback() {
+    playbackQueue.length = 0;
+    if (currentSource) {
+      try { currentSource.stop(); } catch(e) { /* already stopped */ }
+      currentSource = null;
+    }
+    isPlaying = false;
+  }
+
+  // -------------------------------------------------------------------------
+  // VAD + Mic
+  // -------------------------------------------------------------------------
+  async function startVAD() {
+    try {
+      vad = await vad_web.MicVAD.new({
+        positiveSpeechThreshold: 0.8,
+        negativeSpeechThreshold: 0.3,
+        redemptionFrames: 8,
+        preSpeechPadFrames: 5,
+
+        onSpeechStart: function() {
+          if (isMuted) return;
+          sendJSON({ type: "speech_start" });
+          levelRing.classList.add("visible");
+
+          // Interrupt current playback
+          if (isPlaying) {
+            stopPlayback();
+            sendJSON({ type: "interrupt" });
+          }
+        },
+
+        onSpeechEnd: function(audio) {
+          if (isMuted) return;
+          levelRing.classList.remove("visible");
+
+          // audio is Float32Array from VAD — convert to Int16 for server
+          var int16 = float32ToInt16(audio);
+          sendBinary(int16.buffer);
+          sendJSON({ type: "speech_end" });
+        }
+      });
+
+      vad.start();
+      isActive = true;
+      micBtn.classList.add("active");
+      micHint.textContent = "Listening";
+      setVoiceState("listening");
+    } catch(err) {
+      if (err.name === "NotAllowedError") {
+        showError("Microphone permission denied");
+      } else {
+        showError("Mic error: " + err.message);
+      }
+      console.error("VAD init error:", err);
+    }
+  }
+
+  function stopVAD() {
+    if (vad) {
+      vad.pause();
+    }
+    isActive = false;
+    micBtn.classList.remove("active", "listening");
+    levelRing.classList.remove("visible");
+    micHint.textContent = "Click to start";
+    setVoiceState("--");
+    stopPlayback();
+  }
+
+  function toggleMute() {
+    if (!isActive) {
+      startVAD();
+      return;
+    }
+
+    isMuted = !isMuted;
+    micBtn.classList.toggle("muted", isMuted);
+    micIcon.style.display = isMuted ? "none" : "";
+    micOffIcon.style.display = isMuted ? "" : "none";
+    micHint.textContent = isMuted ? "Muted" : "Listening";
+
+    if (isMuted) {
+      levelRing.classList.remove("visible");
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Audio conversion
+  // -------------------------------------------------------------------------
+  function float32ToInt16(float32) {
+    const len = float32.length;
+    const int16 = new Int16Array(len);
+    for (let i = 0; i < len; i++) {
+      const s = Math.max(-1, Math.min(1, float32[i]));
+      int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return int16;
+  }
+
+  // -------------------------------------------------------------------------
+  // Error toast
+  // -------------------------------------------------------------------------
+  function showError(msg) {
+    errorToast.textContent = msg;
+    errorToast.classList.add("visible");
+    if (errorTimer) clearTimeout(errorTimer);
+    errorTimer = setTimeout(function() {
+      errorToast.classList.remove("visible");
+    }, 5000);
+  }
+
+  // -------------------------------------------------------------------------
+  // Event listeners
+  // -------------------------------------------------------------------------
+  micBtn.addEventListener("click", function() {
+    ensureAudioCtx();
+    toggleMute();
+  });
+
+  // Double-click to stop entirely
+  micBtn.addEventListener("dblclick", function() {
+    stopVAD();
+  });
+
+  // -------------------------------------------------------------------------
+  // Init
+  // -------------------------------------------------------------------------
+  connect();
+})();
+</script>
+</body>
+</html>
