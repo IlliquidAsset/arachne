@@ -13,6 +13,7 @@ import {
   stopServer,
   type ServerInfo,
 } from "./server"
+import { startVoice } from "./voice"
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
@@ -115,6 +116,14 @@ const ArachneOrchestratorPlugin: Plugin = async (ctx) => {
 
   serverRegistry.getAll()
   const apiKey = getApiKey(config)
+
+  if (config.voice.enabled) {
+    startVoice(config.voice).catch((error) => {
+      console.error(
+        `[arachne:voice] Failed to start: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    })
+  }
 
   return {
     tool: {
