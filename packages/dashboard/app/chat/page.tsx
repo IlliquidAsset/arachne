@@ -1,5 +1,6 @@
 "use client";
 import { Suspense, useState, useRef, useCallback, useEffect } from "react";
+import Link from "next/link";
 import { MessageList } from "./components/message-list";
 import { ChatInput } from "./components/chat-input";
 import { SessionSidebar, MobileSidebar } from "./components/session-sidebar";
@@ -124,6 +125,13 @@ function ChatContent() {
       <main className="flex-1 flex flex-col min-w-0">
         <div className="p-2 border-b flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="text-muted-foreground hover:text-foreground transition-colors hidden lg:block"
+              aria-label="Back to projects"
+            >
+              &larr;
+            </Link>
             <MobileSidebar
               groupedSessions={groupedSessions}
               activeSessionId={activeSessionId}
@@ -131,7 +139,9 @@ function ChatContent() {
               onNewChat={() => createSession()}
               onDeleteSession={deleteSession}
             />
-            <div className="font-semibold">Amanda</div>
+            <Link href="/" className="font-semibold hover:text-primary transition-colors">
+              Arachne
+            </Link>
           </div>
           <div className="flex items-center gap-2">
             <ConnectionStatus />

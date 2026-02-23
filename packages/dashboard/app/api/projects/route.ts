@@ -125,7 +125,10 @@ async function extractDescription(dirPath: string): Promise<string> {
           trimmed.startsWith("---") ||
           trimmed.startsWith("![") ||
           trimmed.startsWith("[![") ||
-          trimmed.startsWith("<")
+          trimmed.startsWith("<") ||
+          trimmed.startsWith("**") ||
+          trimmed.startsWith("- ") ||
+          trimmed.startsWith("* ")
         ) {
           continue;
         }
