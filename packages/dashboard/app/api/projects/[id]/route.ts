@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { requireAuth, jsonResponse } from "@/app/lib/api-helpers";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { join, basename, dirname } from "node:path";
 
 function getScanDir(): string {
@@ -87,5 +87,33 @@ export async function GET(
     });
   } catch {
     return jsonResponse({ error: "Failed to get project" }, 500);
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const authResult = requireAuth(request);
+  if (authResult instanceof Response) return authResult;
+
+  try {
+    const { id } = await params;
+    const projectPath = await findProjectPath(id);
+
+    if (!projectPath) {
+      return jsonResponse({ error: "Project not found" }, 404);
+    }
+
+    const body = await request.json();
+    const { instructions } = body;
+
+    if (typeof instructions === "string") {
+      await writeFile(join(projectPath, "AGENTS.md"), instructions, "utf-8");
+    }
+
+    return jsonResponse({ ok: true });
+  } catch {
+    return jsonResponse({ error: "Failed to update project" }, 500);
   }
 }

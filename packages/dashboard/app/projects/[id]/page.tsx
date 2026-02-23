@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -12,6 +12,14 @@ interface ProjectDetail {
   instructions: string;
   readme: string;
   knowledgeFiles: string[];
+}
+
+const STUB_TITLE_PATTERN = /^New session - \d{4}-\d{2}-\d{2}T/;
+
+function isRealSession(session: SessionInfo): boolean {
+  if (!session.title) return false;
+  if (STUB_TITLE_PATTERN.test(session.title)) return false;
+  return true;
 }
 
 function getRelativeTime(timestamp: number): string {
@@ -50,6 +58,82 @@ function SessionItem({
   );
 }
 
+function InstructionsEditor({
+  projectId,
+  initialContent,
+}: {
+  projectId: string;
+  initialContent: string;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState(initialContent);
+  const [savedContent, setSavedContent] = useState(initialContent);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instructions: content }),
+      });
+      if (res.ok) {
+        setSavedContent(content);
+        setIsEditing(false);
+      }
+    } catch {
+      void 0;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [projectId, content]);
+
+  const handleCancel = () => {
+    setContent(savedContent);
+    setIsEditing(false);
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="mt-3">
+        <button
+          className="w-full text-left text-sm text-foreground whitespace-pre-wrap bg-card rounded-lg p-3 max-h-80 overflow-y-auto border border-border cursor-pointer hover:border-primary/30 transition-colors"
+          onClick={() => setIsEditing(true)}
+          type="button"
+        >
+          {savedContent || "Click to add project instructions..."}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3">
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full text-sm text-foreground bg-card rounded-lg p-3 border border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary resize-y min-h-32 max-h-80"
+        rows={8}
+        
+      />
+      <div className="flex justify-end gap-2 mt-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleCancel}
+          disabled={isSaving}
+        >
+          Cancel
+        </Button>
+        <Button size="sm" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function KnowledgePanel({
   project,
 }: {
@@ -58,7 +142,7 @@ function KnowledgePanel({
   const [showInstructions, setShowInstructions] = useState(true);
 
   return (
-    <div className="w-80 border-l border-border flex flex-col bg-background overflow-y-auto">
+    <div className="w-80 border-l border-border flex flex-col bg-background overflow-y-auto hidden lg:flex">
       <div className="p-4">
         <button
           onClick={() => setShowInstructions((v) => !v)}
@@ -69,9 +153,10 @@ function KnowledgePanel({
           <span className="text-xs">{showInstructions ? "\u25B2" : "\u25BC"}</span>
         </button>
         {showInstructions && (
-          <div className="mt-3 text-sm text-foreground whitespace-pre-wrap bg-card rounded-lg p-3 max-h-80 overflow-y-auto border border-border">
-            {project.instructions || "No project instructions set."}
-          </div>
+          <InstructionsEditor
+            projectId={project.id}
+            initialContent={project.instructions}
+          />
         )}
       </div>
 
@@ -129,6 +214,7 @@ function ProjectDetailContent() {
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showStubs, setShowStubs] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -163,6 +249,24 @@ function ProjectDetailContent() {
     load();
   }, [projectId]);
 
+  const handleStartConversation = useCallback(async () => {
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: "" }),
+      });
+      if (res.ok) {
+        const session = await res.json();
+        router.push(`/chat?session=${session.id}`);
+      } else {
+        router.push("/chat");
+      }
+    } catch {
+      router.push("/chat");
+    }
+  }, [router]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -182,6 +286,10 @@ function ProjectDetailContent() {
     );
   }
 
+  const realSessions = sessions.filter(isRealSession);
+  const stubCount = sessions.length - realSessions.length;
+  const displaySessions = showStubs ? sessions : realSessions;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border">
@@ -200,9 +308,7 @@ function ProjectDetailContent() {
               {project.absolutePath}
             </span>
           </div>
-          <Button
-            onClick={() => router.push(`/chat`)}
-          >
+          <Button onClick={handleStartConversation}>
             Start conversation
           </Button>
         </div>
@@ -215,26 +321,36 @@ function ProjectDetailContent() {
               <h2 className="font-semibold text-muted-foreground uppercase tracking-wide text-sm">
                 Conversations
               </h2>
-              <span className="text-xs text-muted-foreground">
-                {sessions.length} total
-              </span>
+              <div className="flex items-center gap-3">
+                {stubCount > 0 && (
+                  <button
+                    onClick={() => setShowStubs((v) => !v)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    type="button"
+                  >
+                    {showStubs
+                      ? `Hide ${stubCount} empty sessions`
+                      : `+ ${stubCount} empty sessions`}
+                  </button>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {displaySessions.length} shown
+                </span>
+              </div>
             </div>
 
-            {sessions.length === 0 ? (
+            {displaySessions.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">
                   No conversations yet. Start one!
                 </p>
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push(`/chat`)}
-                >
+                <Button variant="ghost" onClick={handleStartConversation}>
                   Start a conversation
                 </Button>
               </div>
             ) : (
               <div className="space-y-1">
-                {sessions.map((session) => (
+                {displaySessions.map((session) => (
                   <SessionItem
                     key={session.id}
                     session={session}
