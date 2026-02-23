@@ -1,0 +1,16 @@
+{
+  "name": "Arachne",
+  "short_name": "Arachne",
+  "description": "Arachne Chat - Talk to OpenCode",
+  "start_url": "/chat",
+  "display": "standalone",
+  "theme_color": "#0a0a0f",
+  "background_color": "#0a0a0f",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -11,6 +11,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata = {
+  title: "Arachne",
+  description: "Your AI assistant platform",
+  manifest: "/manifest.json"
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0a0f"
+};
+
 export default function RootLayout({
   children,
 }: {
