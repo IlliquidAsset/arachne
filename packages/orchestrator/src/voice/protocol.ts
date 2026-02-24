@@ -30,6 +30,8 @@ export type ServerMessage =
   | { type: "response_text"; text: string }
   | { type: "error"; message: string }
   | { type: "session_limit" }
+  | { type: "warming_up" }
+  | { type: "ready" }
 
 // ---------------------------------------------------------------------------
 // Allowed type strings for validation

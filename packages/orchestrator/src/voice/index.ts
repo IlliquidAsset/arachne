@@ -52,6 +52,8 @@ let wsServer: VoiceWebSocketServer | null = null
 let pipeline: VoicePipeline | null = null
 let llmBridge: LLMBridge | null = null
 
+let startGeneration = 0
+
 function defaultLog(message: string): void {
 	console.log(`[arachne:voice] ${message}`)
 }
@@ -80,10 +82,13 @@ export async function startVoice(
 	const log = deps.log ?? defaultLog
 	const readFile = deps.readFile ?? defaultReadFile
 
-	if (currentState.status === "running") {
+	if (currentState.status === "running" || currentState.status === "starting") {
 		log("Voice already running")
 		return currentState
 	}
+
+	startGeneration++
+	const myGeneration = startGeneration
 
 	currentState = {
 		status: "starting",
@@ -98,35 +103,8 @@ export async function startVoice(
 	const doStartSTT = deps.startSTT ?? startSTT
 	const doGetSTTUrl = deps.getSTTUrl ?? getSTTUrl
 	const doTranscribe = deps.transcribe ?? transcribe
-
-	try {
-		await doStartSTT({
-			binaryPath: expandTilde(config.whisper.binaryPath),
-			modelPath: expandTilde(config.whisper.modelPath),
-			serverPort: config.whisper.serverPort,
-			language: config.whisper.language,
-			useCoreML: config.whisper.useCoreML,
-		})
-		currentState.sttRunning = true
-		log("STT started")
-	} catch (error) {
-		log(`STT failed to start: ${error instanceof Error ? error.message : String(error)}`)
-	}
-
 	const doInitTTS = deps.initTTS ?? initTTS
 	const doGenerateSpeechStream = deps.generateSpeechStream ?? generateSpeechStream
-
-	try {
-		await doInitTTS({
-			engine: config.tts.engine,
-			voiceId: config.tts.voiceId,
-			sampleRate: config.tts.sampleRate,
-		})
-		currentState.ttsReady = true
-		log("TTS initialized")
-	} catch (error) {
-		log(`TTS failed to initialize: ${error instanceof Error ? error.message : String(error)}`)
-	}
 
 	llmBridge = deps.createLLMBridge?.() ?? new LLMBridge()
 	log("LLM bridge created")
@@ -164,6 +142,10 @@ export async function startVoice(
 
 	const wsDeps: WebSocketDependencies = {
 		onAudioReceived: (_ws, audio) => {
+			if (!currentState.sttRunning || !currentState.ttsReady) {
+				if (wsServer) wsServer.sendTo(_ws, { type: "warming_up" })
+				return
+			}
 			pipeline?.handleSpeechEnd(audio, _ws)
 		},
 		onClientMessage: (_ws, msg) => {
@@ -171,9 +153,12 @@ export async function startVoice(
 				pipeline?.interrupt()
 			}
 		},
-		onConnect: () => {
+		onConnect: (ws) => {
 			currentState.activeSessions = wsServer?.getActiveSessions() ?? 0
 			log(`Client connected (${currentState.activeSessions} active)`)
+			if (currentState.status === "starting" && wsServer) {
+				wsServer.sendTo(ws, { type: "warming_up" })
+			}
 		},
 		onDisconnect: () => {
 			currentState.activeSessions = wsServer?.getActiveSessions() ?? 0
@@ -184,13 +169,58 @@ export async function startVoice(
 
 	wsServer.start(config.port, config.maxConcurrentSessions, wsDeps)
 
-	currentState.status = "running"
-	log(`Voice module running on port ${config.port}`)
+	log(`Voice WebSocket server listening on port ${config.port}`)
+
+	// Fire background model loading (NOT awaited)
+	Promise.allSettled([
+		doStartSTT({
+			binaryPath: expandTilde(config.whisper.binaryPath),
+			modelPath: expandTilde(config.whisper.modelPath),
+			serverPort: config.whisper.serverPort,
+			language: config.whisper.language,
+			useCoreML: config.whisper.useCoreML,
+		}).then(() => {
+			if (startGeneration !== myGeneration) return
+			currentState.sttRunning = true
+			log("STT started")
+		}).catch((error) => {
+			if (startGeneration !== myGeneration) return
+			log(`STT failed to start: ${error instanceof Error ? error.message : String(error)}`)
+			throw error
+		}),
+		doInitTTS({
+			engine: config.tts.engine,
+			voiceId: config.tts.voiceId,
+			sampleRate: config.tts.sampleRate,
+		}).then(() => {
+			if (startGeneration !== myGeneration) return
+			currentState.ttsReady = true
+			log("TTS initialized")
+		}).catch((error) => {
+			if (startGeneration !== myGeneration) return
+			log(`TTS failed to initialize: ${error instanceof Error ? error.message : String(error)}`)
+			throw error
+		}),
+	]).then((results) => {
+		if (startGeneration !== myGeneration) return
+		const allFailed = results.every((r) => r.status === "rejected")
+		if (allFailed) {
+			currentState.status = "error"
+			currentState.error = "Both STT and TTS failed to initialize"
+			if (wsServer) wsServer.broadcast({ type: "error", message: "Voice models failed to load" })
+		} else {
+			currentState.status = "running"
+			if (wsServer) wsServer.broadcast({ type: "ready" })
+			log("Voice module running on port " + config.port)
+		}
+	})
 
 	return currentState
 }
 
 export async function stopVoice(deps: VoiceDependencies = {}): Promise<void> {
+	startGeneration++
+
 	const log = deps.log ?? defaultLog
 	const doStopSTT = deps.stopSTT ?? stopSTT
 	const doStopTTS = deps.stopTTS ?? stopTTS
