@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs"
+import { homedir } from "node:os"
 import { join } from "node:path"
 import type { VoiceConfig } from "../config/schema"
 import { VoiceWebSocketServer, type WebSocketDependencies, type SessionData } from "./websocket"
@@ -68,6 +69,10 @@ function defaultReadFile(path: string): string {
 	return readFileSync(path, "utf-8")
 }
 
+function expandTilde(p: string): string {
+	return p.startsWith("~") ? p.replace("~", homedir()) : p
+}
+
 export async function startVoice(
 	config: VoiceConfig,
 	deps: VoiceDependencies = {},
@@ -96,8 +101,8 @@ export async function startVoice(
 
 	try {
 		await doStartSTT({
-			binaryPath: config.whisper.binaryPath,
-			modelPath: config.whisper.modelPath,
+			binaryPath: expandTilde(config.whisper.binaryPath),
+			modelPath: expandTilde(config.whisper.modelPath),
 			serverPort: config.whisper.serverPort,
 			language: config.whisper.language,
 			useCoreML: config.whisper.useCoreML,

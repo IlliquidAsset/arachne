@@ -33,18 +33,18 @@ export const ArachneConfigSchema = z.object({
       port: z.number().min(1).max(65535).default(8090),
       whisper: z
         .object({
-          binaryPath: z.string().default("whisper-server"),
+          binaryPath: z.string().default("~/.config/arachne/whisper.cpp/build/bin/whisper-server"),
           modelPath: z.string().default("~/.config/arachne/models/ggml-large-v3-turbo.bin"),
           serverPort: z.number().min(1).max(65535).default(9000),
           language: z.string().default("en"),
-          useCoreML: z.boolean().default(true),
+          useCoreML: z.boolean().default(false),
         })
         .default({
-          binaryPath: "whisper-server",
+          binaryPath: "~/.config/arachne/whisper.cpp/build/bin/whisper-server",
           modelPath: "~/.config/arachne/models/ggml-large-v3-turbo.bin",
           serverPort: 9000,
           language: "en",
-          useCoreML: true,
+          useCoreML: false,
         }),
       tts: z
         .object({
@@ -70,11 +70,11 @@ export const ArachneConfigSchema = z.object({
       enabled: false,
       port: 8090,
       whisper: {
-        binaryPath: "whisper-server",
+        binaryPath: "~/.config/arachne/whisper.cpp/build/bin/whisper-server",
         modelPath: "~/.config/arachne/models/ggml-large-v3-turbo.bin",
         serverPort: 9000,
         language: "en",
-        useCoreML: true,
+        useCoreML: false,
       },
       tts: {
         engine: "kokoro",
