@@ -239,7 +239,7 @@ function ChatContent() {
     <Group orientation="horizontal" id="chat-layout">
       {!sidebarCollapsed && (
         <>
-          <Panel defaultSize={20} minSize={12} maxSize={30} id="sidebar">
+          <Panel defaultSize="20" minSize="12" maxSize="30" id="sidebar">
             <SessionSidebar
               sessions={sessions}
               activeSessionId={activeSessionId}
@@ -249,19 +249,19 @@ function ChatContent() {
               className="flex flex-col h-full border-r"
             />
           </Panel>
-          <Separator className="w-px hover:w-1 bg-border hover:bg-primary/40 transition-all data-[separator-active]:bg-primary/60" />
-        </>
-      )}
-      <Panel defaultSize={drawerOpen ? 55 : 80} minSize={30} id="main">
+           <Separator className="w-px hover:w-1 bg-border hover:bg-primary/40 transition-all data-[separator=active]:bg-primary/60" />
+         </>
+       )}
+       <Panel defaultSize={drawerOpen ? "55" : "80"} minSize="30" id="main">
         <main className="flex flex-col h-full min-w-0">
           {headerBar}
           {mainContent}
         </main>
       </Panel>
-      {drawerOpen && (
-        <>
-          <Separator className="w-px hover:w-1 bg-border hover:bg-primary/40 transition-all data-[separator-active]:bg-primary/60" />
-          <Panel defaultSize={25} minSize={15} maxSize={40} id="thinking">
+       {drawerOpen && (
+         <>
+           <Separator className="w-px hover:w-1 bg-border hover:bg-primary/40 transition-all data-[separator=active]:bg-primary/60" />
+           <Panel defaultSize="25" minSize="15" maxSize="40" id="thinking">
             <ThinkingDrawer
               isOpen={true}
               thinkingSessions={thinkingSessions}
