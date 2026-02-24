@@ -146,6 +146,10 @@ const ArachneOrchestratorPlugin: Plugin = async (ctx) => {
             .boolean()
             .optional()
             .describe("Force create a new session"),
+          loadSkills: tool.schema
+            .array(tool.schema.string())
+            .optional()
+            .describe("Skill names to selectively load for this dispatch"),
         },
         async execute(args) {
           try {
@@ -171,6 +175,7 @@ const ArachneOrchestratorPlugin: Plugin = async (ctx) => {
               {
                 session: args.session,
                 newSession: args.newSession,
+                loadSkills: args.loadSkills,
               },
               config,
             )
