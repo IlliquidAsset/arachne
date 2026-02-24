@@ -1,4 +1,5 @@
 import { spawn as nodeSpawn } from "node:child_process"
+import { EventEmitter } from "node:events"
 import { createConnection } from "node:net"
 import { ServerRegistry, serverRegistry } from "./registry"
 import type { ServerInfo } from "./types"
@@ -42,9 +43,11 @@ function spawnWithNode(command: string[], options: SpawnOptions): SpawnedServerP
     stdio: "ignore",
   })
 
+  // bun-types ChildProcess omits EventEmitter methods present at runtime
+  const emitter = child as unknown as EventEmitter
   const exited = new Promise<number | null>((resolve) => {
-    child.once("exit", (code) => resolve(code))
-    child.once("error", () => resolve(null))
+    emitter.once("exit", (code: number | null) => resolve(code))
+    emitter.once("error", () => resolve(null))
   })
 
   return {

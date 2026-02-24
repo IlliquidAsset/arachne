@@ -1,4 +1,5 @@
 import { spawn as nodeSpawn } from "node:child_process"
+import { EventEmitter } from "node:events"
 import type {
   WhisperConfig,
   WhisperLifecycleDependencies,
@@ -21,9 +22,11 @@ function spawnWithNode(
     stdio: "ignore",
   })
 
+  // bun-types ChildProcess omits EventEmitter methods present at runtime
+  const emitter = child as unknown as EventEmitter
   const exited = new Promise<number | null>((resolve) => {
-    child.once("exit", (code) => resolve(code))
-    child.once("error", () => resolve(null))
+    emitter.once("exit", (code: number | null) => resolve(code))
+    emitter.once("error", () => resolve(null))
   })
 
   return {

@@ -231,7 +231,7 @@ export class EventMonitor {
       }
 
       state.reconnectAttempt = 0
-      await this.consumeStream(response.body, state, controller.signal)
+      await this.consumeStream(response.body as ReadableStream<Uint8Array>, state, controller.signal)
 
       shouldScheduleReconnect = true
     } catch {
