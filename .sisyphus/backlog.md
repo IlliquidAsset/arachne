@@ -86,6 +86,39 @@ Chat input should support:
 
 Can't type while agent is working (CLI can, dashboard can't). Need message queuing.
 
+### Sub-Agent Sessions Polluting Sidebar (BUG — EASY FIX)
+**Priority**: CRITICAL
+**Source**: Screenshots Feb 24, 2026
+
+Every `task()` dispatch (explore, librarian, sisyphus-junior) creates a new session that appears in the sidebar as a separate chat. Sidebar shows "Task 7: Wire CronScheduler...", "Wave 2A: CronScheduler...", "Research OpenCode skills e..." etc. These are sub-agent sessions and should be invisible to the user.
+
+**Root cause found**: `isRealSession()` in `session-sidebar.tsx` and `projects/[id]/page.tsx` only checks for empty title and stub title pattern. It does NOT check `parentID`. Sub-agent sessions have `parentID` set but pass the filter because they have real titles.
+
+**Fix**: Add `if (session.parentID) return false;` to `isRealSession()` in both files. ~2 line change.
+
+### Thinking Panel Empty While Agent Works (BUG)
+**Priority**: High
+**Source**: Screenshot Feb 24, 2026
+
+"Amanda is thinking..." shows in chat area but thinking panel on right shows nothing, or shows stale reasoning from a previous response. Thinking should stream in real-time (see Streaming Thinking backlog item).
+
+### New Chat Inherits Project Context (UX ISSUE)
+**Priority**: Medium
+**Source**: Screenshot Feb 24, 2026
+
+Clicking "+ New Chat" creates a chat scoped to the current project. User sometimes wants a generic (non-project) chat. Need either:
+- A way to choose "generic" vs "project" when creating
+- Or always create generic, let user assign to project after
+- Or detect from URL context (if on /chat → generic, if on /projects/X → project-scoped)
+
+### TUI/UI Message Fork (BUG — THREADING)
+**Priority**: High
+**Source**: User report Feb 24, 2026
+
+Sending messages to the same session from both TUI (CLI) and dashboard UI may cause a threading fork — the agent appears to stop responding in the UI after messages sent from both interfaces. Possible race condition in session message handling.
+
+**Needs investigation**: Does the OpenCode server handle concurrent prompt submissions to the same session? Or does the second submission silently fail?
+
 ---
 
 ## Autonomy & Workflows
