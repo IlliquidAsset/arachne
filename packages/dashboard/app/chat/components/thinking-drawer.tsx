@@ -11,11 +11,11 @@ interface ThinkingDrawerProps {
 }
 
 export function ThinkingDrawer({ isOpen, thinkingSessions, isThinking, scrollRef }: ThinkingDrawerProps) {
-  if (!isOpen) return null;
+
 
   return (
     <aside
-      className="hidden lg:flex lg:w-80 lg:flex-col border-l bg-background"
+      className="flex flex-col h-full border-l bg-background"
       data-testid="thinking-drawer"
     >
       <div className="p-3 border-b flex items-center justify-between">

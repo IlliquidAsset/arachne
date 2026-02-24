@@ -22,6 +22,7 @@ export interface ThinkingPart {
   reason?: string;
   tokens?: { total: number; input: number; output: number; reasoning: number };
   timestamp: number;
+  agent?: string;
 }
 
 export interface QuestionOption {
@@ -58,6 +59,7 @@ export function useChatStream(
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const retriesRef = useRef(0);
+  const currentAgentRef = useRef<string | undefined>(undefined);
   const maxRetries = 5;
   const onStreamCompleteRef = useRef(options?.onStreamComplete);
   const onSessionUpdatedRef = useRef(options?.onSessionUpdated);
@@ -134,8 +136,17 @@ export function useChatStream(
                 const toolName: string = part.tool || "unknown";
                 const callID: string | undefined = part.callID;
                 const status: string | undefined = part.state?.status;
+                const isDispatch = toolName === "mcp_task" || toolName === "mcp_arachne_dispatch";
 
                 if (status === "running" || status === "pending") {
+                  if (isDispatch) {
+                    const inp = part.state?.input;
+                    if (inp && typeof inp === "object") {
+                      const r = inp as Record<string, unknown>;
+                      currentAgentRef.current = (typeof r.subagent_type === "string" ? r.subagent_type : undefined)
+                        || (typeof r.category === "string" ? r.category : undefined);
+                    }
+                  }
                   setWaitingForResponse(false);
                   setIsStreaming(true);
                   setCurrentToolUse(toolName);
@@ -145,9 +156,10 @@ export function useChatStream(
                     callID,
                     input: part.state?.input,
                     timestamp: part.state?.time?.start || Date.now(),
+                    agent: isDispatch ? currentAgentRef.current : currentAgentRef.current,
                   }]);
 
-                  if (toolName === "mcp_question") {
+                  if (toolName === "mcp_question" || toolName === "question") {
                     const input = part.state?.input;
                     const questions = input?.questions || input?.arguments?.questions;
                     if (Array.isArray(questions) && questions.length > 0) {
@@ -166,9 +178,11 @@ export function useChatStream(
                   }
                 } else if (status === "completed" || status === "error") {
                   setCurrentToolUse(null);
-                  if (toolName === "mcp_question") {
+                  if (toolName === "mcp_question" || toolName === "question") {
                     setPendingQuestion(null);
                   }
+                  const endAgent = isDispatch ? currentAgentRef.current : currentAgentRef.current;
+                  if (isDispatch) currentAgentRef.current = undefined;
                   setCurrentThinkingParts(prev => [...prev, {
                     type: "tool-end" as const,
                     tool: toolName,
@@ -176,6 +190,7 @@ export function useChatStream(
                     output: typeof part.state?.output === "string" ? part.state.output.slice(0, 500) : undefined,
                     status: status,
                     timestamp: Date.now(),
+                    agent: endAgent,
                   }]);
                 }
               } else if (part.type === "reasoning" && part.text) {
@@ -183,11 +198,13 @@ export function useChatStream(
                   type: "reasoning" as const,
                   text: part.text,
                   timestamp: part.time?.start || Date.now(),
+                  agent: currentAgentRef.current,
                 }]);
               } else if (part.type === "step-start") {
                 setCurrentThinkingParts(prev => [...prev, {
                   type: "step-start" as const,
                   timestamp: part.time?.start || Date.now(),
+                  agent: currentAgentRef.current,
                 }]);
               } else if (part.type === "step-finish") {
                 setCurrentThinkingParts(prev => [...prev, {
@@ -195,6 +212,7 @@ export function useChatStream(
                   reason: part.reason,
                   tokens: part.tokens,
                   timestamp: Date.now(),
+                  agent: currentAgentRef.current,
                 }]);
               }
             } else if (eventType === "message.updated") {
@@ -223,6 +241,7 @@ export function useChatStream(
                setIsStreaming(false);
                setCurrentMessage("");
                hasReceivedDeltaRef.current = false;
+               currentAgentRef.current = undefined;
 
                setPendingQuestion(null);
                onStreamCompleteRef.current?.();
@@ -283,5 +302,9 @@ export function useChatStream(
 
   const dismissQuestion = useCallback(() => setPendingQuestion(null), []);
 
-  return { currentMessage, isStreaming, isLoading, error, currentToolUse, waitingForResponse, markWaitingForResponse, currentThinkingParts, pendingQuestion, dismissQuestion, isSessionBusy };
+  const restorePendingQuestion = useCallback((q: PendingQuestion) => {
+    if (!pendingQuestion) setPendingQuestion(q);
+  }, [pendingQuestion]);
+
+  return { currentMessage, isStreaming, isLoading, error, currentToolUse, waitingForResponse, markWaitingForResponse, currentThinkingParts, pendingQuestion, dismissQuestion, restorePendingQuestion, isSessionBusy };
 }

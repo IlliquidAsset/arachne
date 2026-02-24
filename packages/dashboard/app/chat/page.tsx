@@ -1,6 +1,7 @@
 "use client";
 import { Suspense, useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { Panel, Group, Separator } from "react-resizable-panels";
 import { MessageList } from "./components/message-list";
 import { ChatInput } from "./components/chat-input";
 import { SessionSidebar, MobileSidebar } from "./components/session-sidebar";
@@ -23,7 +24,6 @@ function ChatContent() {
     updateSessionTitle,
   } = useSessions();
 
-  // Lifted hooks — shared between MessageList and ThinkingDrawer
   const { messages, isLoading, refetch, addOptimisticMessage } = useMessages(activeSessionId);
   const {
     currentMessage,
@@ -34,6 +34,7 @@ function ChatContent() {
     currentThinkingParts,
     pendingQuestion,
     dismissQuestion,
+    restorePendingQuestion,
     isSessionBusy,
   } = useChatStream(activeSessionId, {
     onStreamComplete: refetch,
@@ -53,14 +54,52 @@ function ChatContent() {
     }
   }, [dismissQuestion, addOptimisticMessage, sendMessage]);
 
+  useEffect(() => {
+    if (pendingQuestion || !messages.length) return;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role !== "assistant") continue;
+      for (const part of msg.parts) {
+        if (part.type === "tool" && (part.tool === "question" || part.tool === "mcp_question") && part.state?.status === "running") {
+          const input = part.state?.input as any;
+          const questions = input?.questions || input?.arguments?.questions;
+          if (Array.isArray(questions) && questions.length > 0) {
+            const q = questions[0];
+            restorePendingQuestion({
+              header: q.header || "Question",
+              question: q.question || "",
+              options: (q.options || []).map((o: any) => ({
+                label: o.label || "",
+                description: o.description || "",
+              })),
+              multiple: q.multiple || false,
+              callID: part.callID,
+            });
+            return;
+          }
+        }
+      }
+      break;
+    }
+  }, [messages, pendingQuestion, restorePendingQuestion]);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sidebar-collapsed") === "true";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   const messageScrollRef = useRef<HTMLDivElement>(null);
   const thinkingScrollRef = useRef<HTMLDivElement>(null);
   const scrollSourceRef = useRef<"chat" | "thinking" | null>(null);
 
-  // Mobile detection
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1024);
     check();
@@ -68,7 +107,6 @@ function ChatContent() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Bidirectional scroll sync (desktop only)
   useEffect(() => {
     if (!drawerOpen || isMobile) return;
 
@@ -79,20 +117,16 @@ function ChatContent() {
     const handleChatScroll = () => {
       if (scrollSourceRef.current === "thinking") return;
       scrollSourceRef.current = "chat";
-
       const chatScrollRatio = chatEl.scrollTop / (chatEl.scrollHeight - chatEl.clientHeight || 1);
       thinkingEl.scrollTop = chatScrollRatio * (thinkingEl.scrollHeight - thinkingEl.clientHeight);
-
       requestAnimationFrame(() => { scrollSourceRef.current = null; });
     };
 
     const handleThinkingScroll = () => {
       if (scrollSourceRef.current === "chat") return;
       scrollSourceRef.current = "thinking";
-
       const thinkingScrollRatio = thinkingEl.scrollTop / (thinkingEl.scrollHeight - thinkingEl.clientHeight || 1);
       chatEl.scrollTop = thinkingScrollRatio * (chatEl.scrollHeight - chatEl.clientHeight);
-
       requestAnimationFrame(() => { scrollSourceRef.current = null; });
     };
 
@@ -112,90 +146,132 @@ function ChatContent() {
     markWaitingForResponse();
   }, [addOptimisticMessage, markWaitingForResponse]);
 
-  return (
-    <>
-      <SessionSidebar
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onSessionSelect={setActiveSession}
-        onNewChat={() => createSession()}
-        onDeleteSession={deleteSession}
-        className="hidden lg:flex lg:w-64 lg:flex-col border-r"
-      />
+  const headerBar = (
+    <div className="p-2 border-b flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarCollapsed(prev => !prev)}
+          className="hidden lg:inline-flex h-7 w-7 text-muted-foreground hover:text-foreground"
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sidebarCollapsed ? "»" : "«"}
+        </Button>
+        <Link
+          href="/projects"
+          className="text-muted-foreground hover:text-foreground transition-colors hidden lg:block"
+          aria-label="Back to projects"
+        >
+          &larr;
+        </Link>
+        <MobileSidebar
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          onSessionSelect={setActiveSession}
+          onNewChat={() => createSession()}
+          onDeleteSession={deleteSession}
+        />
+        <Link href="/projects" className="font-semibold hover:text-primary transition-colors">
+          Arachne
+        </Link>
+      </div>
+      <div className="flex items-center gap-2">
+        <ConnectionStatus />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setDrawerOpen(prev => !prev)}
+          className="relative"
+          aria-label={drawerOpen ? "Close thinking drawer" : "Open thinking drawer"}
+          data-testid="thinking-toggle"
+        >
+          🧠
+          {isThinking && (
+            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+          )}
+        </Button>
+      </div>
+    </div>
+  );
 
-      <main className="flex-1 flex flex-col min-w-0">
-        <div className="p-2 border-b flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Link
-              href="/projects"
-              className="text-muted-foreground hover:text-foreground transition-colors hidden lg:block"
-              aria-label="Back to projects"
-            >
-              &larr;
-            </Link>
-            <MobileSidebar
+  const mainContent = (
+    <>
+      <MessageList
+        messages={messages}
+        isLoading={isLoading}
+        currentMessage={currentMessage}
+        isStreaming={isStreaming}
+        currentToolUse={currentToolUse}
+        waitingForResponse={waitingForResponse}
+        scrollRef={messageScrollRef}
+        pendingQuestion={pendingQuestion}
+        onQuestionAnswer={handleQuestionAnswer}
+        onQuestionDismiss={dismissQuestion}
+      />
+      <ChatInput
+        sessionId={activeSessionId}
+        isStreaming={isStreaming}
+        isSessionBusy={isSessionBusy}
+        onOptimisticSend={handleSend}
+      />
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <main className="flex-1 flex flex-col min-w-0">
+          {headerBar}
+          {mainContent}
+        </main>
+        <MobileThinkingDrawer
+          isOpen={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          thinkingSessions={thinkingSessions}
+          isThinking={isThinking}
+        />
+      </>
+    );
+  }
+
+  return (
+    <Group orientation="horizontal" id="chat-layout">
+      {!sidebarCollapsed && (
+        <>
+          <Panel defaultSize={20} minSize={12} maxSize={30} id="sidebar">
+            <SessionSidebar
               sessions={sessions}
               activeSessionId={activeSessionId}
               onSessionSelect={setActiveSession}
               onNewChat={() => createSession()}
               onDeleteSession={deleteSession}
+              className="flex flex-col h-full border-r"
             />
-            <Link href="/projects" className="font-semibold hover:text-primary transition-colors">
-              Arachne
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <ConnectionStatus />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDrawerOpen(prev => !prev)}
-              className="relative"
-              aria-label={drawerOpen ? "Close thinking drawer" : "Open thinking drawer"}
-              data-testid="thinking-toggle"
-            >
-              🧠
-              {isThinking && (
-                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        <MessageList
-          messages={messages}
-          isLoading={isLoading}
-          currentMessage={currentMessage}
-          isStreaming={isStreaming}
-          currentToolUse={currentToolUse}
-          waitingForResponse={waitingForResponse}
-          scrollRef={messageScrollRef}
-          pendingQuestion={pendingQuestion}
-          onQuestionAnswer={handleQuestionAnswer}
-          onQuestionDismiss={dismissQuestion}
-        />
-        <ChatInput
-          sessionId={activeSessionId}
-          isStreaming={isStreaming}
-          isSessionBusy={isSessionBusy}
-          onOptimisticSend={handleSend}
-        />
-      </main>
-
-      <ThinkingDrawer
-        isOpen={drawerOpen && !isMobile}
-        thinkingSessions={thinkingSessions}
-        isThinking={isThinking}
-        scrollRef={thinkingScrollRef}
-      />
-
-      <MobileThinkingDrawer
-        isOpen={drawerOpen && isMobile}
-        onOpenChange={setDrawerOpen}
-        thinkingSessions={thinkingSessions}
-        isThinking={isThinking}
-      />
-    </>
+          </Panel>
+          <Separator className="w-px hover:w-1 bg-border hover:bg-primary/40 transition-all data-[separator-active]:bg-primary/60" />
+        </>
+      )}
+      <Panel defaultSize={drawerOpen ? 55 : 80} minSize={30} id="main">
+        <main className="flex flex-col h-full min-w-0">
+          {headerBar}
+          {mainContent}
+        </main>
+      </Panel>
+      {drawerOpen && (
+        <>
+          <Separator className="w-px hover:w-1 bg-border hover:bg-primary/40 transition-all data-[separator-active]:bg-primary/60" />
+          <Panel defaultSize={25} minSize={15} maxSize={40} id="thinking">
+            <ThinkingDrawer
+              isOpen={true}
+              thinkingSessions={thinkingSessions}
+              isThinking={isThinking}
+              scrollRef={thinkingScrollRef}
+            />
+          </Panel>
+        </>
+      )}
+    </Group>
   );
 }
 
