@@ -15,7 +15,7 @@ import { useSendMessage } from "@/app/hooks/use-send-message";
 
 function ChatContent() {
   const {
-    groupedSessions,
+    sessions,
     activeSessionId,
     setActiveSession,
     createSession,
@@ -114,7 +114,7 @@ function ChatContent() {
   return (
     <>
       <SessionSidebar
-        groupedSessions={groupedSessions}
+        sessions={sessions}
         activeSessionId={activeSessionId}
         onSessionSelect={setActiveSession}
         onNewChat={() => createSession()}
@@ -126,20 +126,20 @@ function ChatContent() {
         <div className="p-2 border-b flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Link
-              href="/"
+              href="/projects"
               className="text-muted-foreground hover:text-foreground transition-colors hidden lg:block"
               aria-label="Back to projects"
             >
               &larr;
             </Link>
             <MobileSidebar
-              groupedSessions={groupedSessions}
+              sessions={sessions}
               activeSessionId={activeSessionId}
               onSessionSelect={setActiveSession}
               onNewChat={() => createSession()}
               onDeleteSession={deleteSession}
             />
-            <Link href="/" className="font-semibold hover:text-primary transition-colors">
+            <Link href="/projects" className="font-semibold hover:text-primary transition-colors">
               Arachne
             </Link>
           </div>

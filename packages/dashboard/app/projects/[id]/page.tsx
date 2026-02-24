@@ -279,7 +279,7 @@ function ProjectDetailContent() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <p className="text-destructive">{error || "Project not found"}</p>
-        <Button variant="ghost" onClick={() => router.push("/")}>
+        <Button variant="ghost" onClick={() => router.push("/projects")}>
           Back to projects
         </Button>
       </div>
@@ -298,7 +298,7 @@ function ProjectDetailContent() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/projects")}
               aria-label="Back to projects"
             >
               &larr;
