@@ -129,3 +129,107 @@ Chrome detection currently macOS-only (AppleScript, `open -a`). Support Linux Ch
 **Source**: Investigation finding
 
 Skills use fragile relative imports (`../../email-reader/src/...`). Consider restructuring into proper npm workspace packages for reliable resolution.
+
+---
+
+## Top 50 Skills We Need (Ranked by Usefulness)
+
+> Researched Feb 24, 2026. Cross-referenced against 7,300+ GitHub repos, awesome-mcp-servers (81K★),
+> awesome-claude-code (25K★), awesome-claude-skills (37K★), awesome-agent-skills (8K★), and 500+ individual skills.
+>
+> **What we already have**: social-poster, social-poster-v2, workflow-orchestrator, voice-learner, email-reader,
+> playwright, frontend-ui-ux, git-master, dev-browser
+>
+> **Skills explicitly requested in our discussions** are marked with 🎯
+
+### Tier 1 — Immediately Valuable (install or build ASAP)
+
+| # | Skill | Why | Source |
+|---|-------|-----|--------|
+| 1 | 🎯 **mermaid-renderer** | Render mermaid diagrams to SVG/PNG in dashboard messages. User explicitly requested. | Build (backlog item) |
+| 2 | 🎯 **rich-content-renderer** | ASCII tables → HTML, code blocks → syntax-highlighted, structured output → visual. User explicitly requested. | Build (backlog item) |
+| 3 | **claude-mem** (30K★) | Persistent memory across sessions — captures everything, compresses with AI, injects relevant context into future sessions. Solves our biggest pain point: context loss between sessions. | [thedotmack/claude-mem](https://github.com/thedotmack/claude-mem) |
+| 4 | **Trail of Bits security skills** (2.9K★) | 28 professional security skills: CodeQL, Semgrep, variant analysis, vulnerability detection, secure contracts. Essential for shipping production code. | [trailofbits/skills](https://github.com/trailofbits/skills) |
+| 5 | **planning-with-files** (14K★) | Manus-style persistent markdown planning. We already have `.sisyphus/plans/` — this would formalize it as a reusable skill other Arachne users can benefit from. | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
+| 6 | **last30days-skill** (3K★) | Research Reddit + X from last 30 days. Directly feeds into our content workflow — find trending topics before writing tweets. | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) |
+| 7 | 🎯 **image-input-skill** | Handle pasted images and document uploads in chat. User explicitly requested. | Build (backlog item) |
+| 8 | **humanizer** (6.6K★) | Remove AI-generated writing signs. Critical for content workflow — ensures tweets/posts read as authentic human voice. | [blader/humanizer](https://github.com/blader/humanizer) |
+| 9 | **supabase agent-skills** (1.4K★) | Postgres best practices for Supabase. If we ever use Supabase for Arachne persistence. | [supabase/agent-skills](https://github.com/supabase/agent-skills) |
+| 10 | 🎯 **question-tool-renderer** | Render Prometheus interview questions in dashboard. Explicitly broken — user reported it. | Build (backlog item) |
+
+### Tier 2 — High Value (strong ROI)
+
+| # | Skill | Why | Source |
+|---|-------|-----|--------|
+| 11 | **Claudeception** (1.7K★) | Autonomous skill extraction — learns from sessions and generates new skills automatically. Meta-skill that makes us better over time. | [blader/Claudeception](https://github.com/blader/Claudeception) |
+| 12 | **beads** (17K★) | Memory upgrade for coding agents. Lightweight persistent context that survives across sessions. | [steveyegge/beads](https://github.com/steveyegge/beads) |
+| 13 | **superpowers** | Bundle of core engineering competencies — planning, reviewing, testing, debugging. Well-written, adaptable. | [obra/superpowers](https://github.com/obra/superpowers) |
+| 14 | **context-engineering-kit** (518★) | Hand-crafted context engineering techniques with minimal token footprint. Improves agent result quality. | [NeoLabHQ/context-engineering-kit](https://github.com/NeoLabHQ/context-engineering-kit) |
+| 15 | **marketingskills** (9K★) | CRO, copywriting, SEO, analytics, growth engineering. Directly useful for content workflow and growing audience. | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) |
+| 16 | **napkin** (318★) | Persistent memory of mistakes via markdown scratchpad. Prevents repeating the same errors across sessions. | [blader/napkin](https://github.com/blader/napkin) |
+| 17 | **AI-Research-SKILLs** (3.8K★) | Comprehensive AI research and engineering skills. Useful for staying current with ML/AI developments. | [Orchestra-Research/AI-Research-SKILLs](https://github.com/Orchestra-Research/AI-Research-SKILLs) |
+| 18 | **videocut-skills** (959★) | Video editing agent. Could extend content workflow beyond text to video content. | [Ceeon/videocut-skills](https://github.com/Ceeon/videocut-skills) |
+| 19 | **cc-devops-skills** | Immensely detailed DevOps skills — IaC, deployment, CI/CD for any platform. | [akin-ozer/cc-devops-skills](https://github.com/akin-ozer/cc-devops-skills) |
+| 20 | **tapestry-skills** (249★) | Download articles, PDFs, YouTube transcripts. Content research tool for the workflow. | [michalparkola/tapestry-skills-for-claude-code](https://github.com/michalparkola/tapestry-skills-for-claude-code) |
+
+### Tier 3 — Solid Additions (worth installing)
+
+| # | Skill | Why | Source |
+|---|-------|-----|--------|
+| 21 | **SkillForge** (515★) | Meta-skill for generating best-in-class skills. Build skills faster. | [tripleyak/SkillForge](https://github.com/tripleyak/SkillForge) |
+| 22 | **react-native-skills** (Callstack, 922★) | Agent-optimized React Native skills. If we ever go native mobile for Arachne. | [callstackincubator/agent-skills](https://github.com/callstackincubator/agent-skills) |
+| 23 | **x-article-publisher-skill** (597★) | Publish long-form articles to X. Extends social-poster beyond tweets to articles. | [wshuyi/x-article-publisher-skill](https://github.com/wshuyi/x-article-publisher-skill) |
+| 24 | **seo-geo-claude-skills** (241★) | 20 SEO & GEO skills with CORE-EEAT + CITE frameworks. Content optimization. | [aaron-he-zhu/seo-geo-claude-skills](https://github.com/aaron-he-zhu/seo-geo-claude-skills) |
+| 25 | **lenny-skills** (281★) | 86 product management skills from Lenny's Podcast. Good for product thinking. | [RefoundAI/lenny-skills](https://github.com/RefoundAI/lenny-skills) |
+| 26 | **learning-opportunities** (254★) | Deliberate skill development during AI-assisted coding. Helps YOU learn, not just ship. | [DrCatHicks/learning-opportunities](https://github.com/DrCatHicks/learning-opportunities) |
+| 27 | **compound-engineering-plugin** | Turns mistakes into lessons — skills/commands for continuous improvement. | [EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) |
+| 28 | **google-ai-mode-skill** (100★) | Free Google AI Mode search with citations. Alternative to paid search APIs. | [PleasePrompto/google-ai-mode-skill](https://github.com/PleasePrompto/google-ai-mode-skill) |
+| 29 | **claude-skill-homeassistant** (290★) | Home Assistant workflows. Smart home automation via agent. | [komal-SkyNET/claude-skill-homeassistant](https://github.com/komal-SkyNET/claude-skill-homeassistant) |
+| 30 | 🎯 **linkedin-poster** | Post to LinkedIn. User explicitly has social-poster for X — LinkedIn is the missing piece. | Build (extend social-poster) |
+
+### Tier 4 — Specialized / Nice-to-Have
+
+| # | Skill | Why | Source |
+|---|-------|-----|--------|
+| 31 | **smart-illustrator** (325★) | AI-powered illustration generation. Visual content for posts/docs. | [axtonliu/smart-illustrator](https://github.com/axtonliu/smart-illustrator) |
+| 32 | **solana-dev-skill** (358★) | Modern Solana development. If crypto/web3 is in scope. | [solana-foundation/solana-dev-skill](https://github.com/solana-foundation/solana-dev-skill) |
+| 33 | **charlie-cfo-skill** (150★) | Financial analysis and CFO perspective. Business planning. | [EveryInc/charlie-cfo-skill](https://github.com/EveryInc/charlie-cfo-skill) |
+| 34 | **nuxt-skills** (559★) | Vue, Nuxt, and NuxtHub skills. Framework-specific expertise. | [onmax/nuxt-skills](https://github.com/onmax/nuxt-skills) |
+| 35 | **dotnet-skills** (411★) | .NET development. If we ever need C#/F# work. | [Aaronontheweb/dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills) |
+| 36 | **SwiftUI-Agent-Skill** (1.7K★) | Expert SwiftUI best practices. Native iOS development. | [AvdLee/SwiftUI-Agent-Skill](https://github.com/AvdLee/SwiftUI-Agent-Skill) |
+| 37 | **book-factory** | Pipeline for nonfiction book creation using specialized skills. Long-form content. | [robertguss/claude-skills](https://github.com/robertguss/claude-skills) |
+| 38 | **reverse-skills** (89★) | Reverse engineering. Deep debugging and binary analysis. | [P4nda0s/reverse-skills](https://github.com/P4nda0s/reverse-skills) |
+| 39 | **playwright-bot-bypass** (111★) | Bypass bot detection (CAPTCHA, etc.). Extends Playwright for scraping. | [greekr4/playwright-bot-bypass](https://github.com/greekr4/playwright-bot-bypass) |
+| 40 | **raptor** (1.2K★) | Offensive/defensive security agent. Pen testing. | [gadievron/raptor](https://github.com/gadievron/raptor) |
+
+### Tier 5 — Build Ourselves (from our discussions + Arachne-specific needs)
+
+| # | Skill | Why | Source |
+|---|-------|-----|--------|
+| 41 | 🎯 **streaming-thinking** | Show agent thinking tokens in real-time, not buffered. User explicitly requested. | Build (backlog item) |
+| 42 | 🎯 **mobile-audit** | Playwright-based mobile viewport auditing skill — screenshot at 375/390/428px, catalog issues. | Build (from 4/10 mobile rating) |
+| 43 | 🎯 **rss-content-source** | RSS adapter for ContentSource interface. Pluggable content beyond Grok emails. | Build (backlog item) |
+| 44 | 🎯 **manual-queue-source** | Manual content queue adapter. Paste ideas → Muse → DA → post pipeline. | Build (backlog item) |
+| 45 | 🎯 **dashboard-workflow-ui** | Configure workflow schedules, content sources, voice profiles from dashboard. | Build (backlog item) |
+| 46 | **google-photos-skill** | Browse/search Google Photos. User mentioned wanting to share phone screenshots. | Build |
+| 47 | **message-queue-skill** | Queue messages while agent is working. Dashboard can't, CLI can — needs parity. | Build (backlog item) |
+| 48 | **deploy-skill** | One-click deploy Arachne to Vercel/Railway/Fly.io. Essential for "anyone can install" goal. | Build |
+| 49 | **test-generator** | Auto-generate unit/integration tests from code. Would accelerate our own development. | Build |
+| 50 | **skill-installer** | CLI to browse, install, and manage skills. `arachne skill install trail-of-bits/security`. | Build |
+
+### Summary
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| Install from community | 29 | claude-mem, Trail of Bits, humanizer, beads |
+| Build ourselves (user-requested 🎯) | 12 | mermaid-renderer, image-input, question-tool, streaming-thinking |
+| Build ourselves (Arachne-specific) | 9 | deploy-skill, test-generator, skill-installer |
+| **Total** | **50** | |
+
+### Key Repositories to Watch
+
+- [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) — 25K★, updated daily, best curated list
+- [awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) — 81K★, MCP server directory
+- [awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) — 8K★, 380+ skills catalog
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — 51K★, battle-tested configs
+- [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) — 34K★, our agent harness
