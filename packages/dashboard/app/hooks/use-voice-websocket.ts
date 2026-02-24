@@ -9,6 +9,7 @@ type VoiceState =
   | "processing"
   | "thinking"
   | "speaking"
+  | "warming_up"
   | "error";
 type ConnectionState = "disconnected" | "connecting" | "connected";
 
@@ -78,6 +79,12 @@ export function useVoiceWebSocket(wsUrl: string) {
           break;
         case "speaking":
           setState("speaking");
+          break;
+        case "warming_up":
+          setState("warming_up");
+          break;
+        case "ready":
+          setState("listening");
           break;
         case "transcription":
           setTranscription(msg.text || "");

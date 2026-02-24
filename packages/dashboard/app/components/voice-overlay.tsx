@@ -10,6 +10,7 @@ type VoiceState =
   | "processing"
   | "thinking"
   | "speaking"
+  | "warming_up"
   | "error";
 type ConnectionState = "disconnected" | "connecting" | "connected";
 
@@ -31,6 +32,7 @@ const STATE_LABELS: Record<VoiceState, string> = {
   processing: "Processing...",
   thinking: "Thinking...",
   speaking: "Speaking...",
+  warming_up: "Warming up...",
   error: "Error",
 };
 
@@ -60,6 +62,8 @@ function orbClasses(state: VoiceState, isMuted: boolean): string {
       return `${base} border-amber-500 bg-amber-500/10 shadow-[0_0_30px_rgba(234,179,8,0.2)] animate-spin-slow`;
     case "speaking":
       return `${base} border-indigo-500 bg-indigo-500/30 shadow-[0_0_50px_rgba(99,102,241,0.4)] scale-110`;
+    case "warming_up":
+      return `${base} border-amber-500 bg-amber-500/10 shadow-[0_0_30px_rgba(234,179,8,0.2)] animate-pulse`;
     case "error":
       return `${base} border-red-500 bg-red-500/10`;
     default:
