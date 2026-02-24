@@ -9,12 +9,14 @@ const MAX_HEIGHT_PX = 144;
 interface ChatInputProps {
   sessionId: string | null;
   isStreaming?: boolean;
+  isSessionBusy?: boolean;
   onOptimisticSend?: (text: string) => void;
 }
 
 export function ChatInput({
   sessionId,
   isStreaming = false,
+  isSessionBusy = false,
   onOptimisticSend,
 }: ChatInputProps) {
   const [input, setInput] = useState("");
@@ -98,8 +100,8 @@ export function ChatInput({
     autoResize();
   };
 
-  const inputDisabled = isSending;
-  const sendDisabled = isSending || !input.trim();
+  const inputDisabled = isSending || isSessionBusy;
+  const sendDisabled = isSending || isSessionBusy || !input.trim();
   const queuedCount = messageQueueRef.current.length;
   
   const handleMicClick = () => {
@@ -131,7 +133,7 @@ export function ChatInput({
             value={input}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-             placeholder="Message Amanda..."
+             placeholder={isSessionBusy ? "Agent is working..." : "Message Amanda..."}
            className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono"
            disabled={inputDisabled}
            rows={1}

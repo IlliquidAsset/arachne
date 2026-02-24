@@ -54,6 +54,7 @@ export function useChatStream(
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const [currentThinkingParts, setCurrentThinkingParts] = useState<ThinkingPart[]>([]);
   const [pendingQuestion, setPendingQuestion] = useState<PendingQuestion | null>(null);
+  const [isSessionBusy, setIsSessionBusy] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const retriesRef = useRef(0);
@@ -217,6 +218,7 @@ export function useChatStream(
               }
             } else if (eventType === "session.idle") {
                if (streamTimeoutRef.current) clearTimeout(streamTimeoutRef.current);
+               setIsSessionBusy(false);
                setWaitingForResponse(false);
                setIsStreaming(false);
                setCurrentMessage("");
@@ -230,6 +232,12 @@ export function useChatStream(
             const title = info?.title;
             if (updatedSessionId && title) {
               onSessionUpdatedRef.current?.({ id: updatedSessionId, title });
+            }
+          } else if (eventType === "session.status") {
+            const incomingSessionId = data.properties?.sessionID || data.props?.sessionID;
+            const status = data.properties?.status || data.props?.status;
+            if (incomingSessionId === sessionId && status?.type) {
+              setIsSessionBusy(status.type === "busy");
             }
           } else if (eventType === "session.error") {
             const msg = data.properties?.message || data.props?.message;
@@ -275,5 +283,5 @@ export function useChatStream(
 
   const dismissQuestion = useCallback(() => setPendingQuestion(null), []);
 
-  return { currentMessage, isStreaming, isLoading, error, currentToolUse, waitingForResponse, markWaitingForResponse, currentThinkingParts, pendingQuestion, dismissQuestion };
+  return { currentMessage, isStreaming, isLoading, error, currentToolUse, waitingForResponse, markWaitingForResponse, currentThinkingParts, pendingQuestion, dismissQuestion, isSessionBusy };
 }

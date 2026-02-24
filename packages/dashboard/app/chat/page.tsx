@@ -34,6 +34,7 @@ function ChatContent() {
     currentThinkingParts,
     pendingQuestion,
     dismissQuestion,
+    isSessionBusy,
   } = useChatStream(activeSessionId, {
     onStreamComplete: refetch,
     onSessionUpdated: updateSessionTitle,
@@ -176,6 +177,7 @@ function ChatContent() {
         <ChatInput
           sessionId={activeSessionId}
           isStreaming={isStreaming}
+          isSessionBusy={isSessionBusy}
           onOptimisticSend={handleSend}
         />
       </main>
