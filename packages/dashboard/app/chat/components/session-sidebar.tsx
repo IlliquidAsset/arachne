@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { SessionInfo } from "@/app/lib/types";
+import { isRealSession } from "@/app/lib/session-utils";
 import { useProjects } from "@/app/hooks/use-projects";
 
-const STUB_TITLE_PATTERN = /^New session - \d{4}-\d{2}-\d{2}T/;
 const MAX_SIDEBAR_PROJECTS = 5;
 
 export interface SessionGroup {
@@ -23,12 +23,6 @@ interface SessionSidebarProps {
   onNewChat: () => void;
   onDeleteSession: (id: string) => void;
   className?: string;
-}
-
-function isRealSession(session: SessionInfo): boolean {
-  if (!session.title) return false;
-  if (STUB_TITLE_PATTERN.test(session.title)) return false;
-  return true;
 }
 
 function ProjectsSection() {

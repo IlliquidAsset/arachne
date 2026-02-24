@@ -61,6 +61,7 @@ export function useChatStream(
   const onStreamCompleteRef = useRef(options?.onStreamComplete);
   const onSessionUpdatedRef = useRef(options?.onSessionUpdated);
   const hasReceivedDeltaRef = useRef(false);
+  const hasClearedThinkingRef = useRef(false);
   const streamTimeoutRef = useRef<number | null>(null);
 
   const markWaitingForResponse = useCallback(() => {
@@ -88,7 +89,7 @@ export function useChatStream(
       }
 
       const directory = encodeURIComponent(
-        process.env.NEXT_PUBLIC_PROJECT_DIR || "/Users/kendrick/Documents/dev/arachne",
+        process.env.NEXT_PUBLIC_PROJECT_DIR || "",
       );
       const eventSource = new EventSource(`/api/events?directory=${directory}`);
       eventSourceRef.current = eventSource;
@@ -96,33 +97,112 @@ export function useChatStream(
        eventSource.onmessage = (event) => {
          try {
            const data = JSON.parse(event.data);
+           const eventType = data.type as string | undefined;
 
-           if (data.type === "message.part.delta") {
+           if (eventType === "message.part.delta") {
+              if (!hasClearedThinkingRef.current) {
+                setCurrentThinkingParts([]);
+                hasClearedThinkingRef.current = true;
+              }
               setWaitingForResponse(false);
               setIsStreaming(true);
               hasReceivedDeltaRef.current = true;
               setCurrentMessage((prev) => {
-                const next = prev + (data.props?.delta || "");
+                const delta = data.properties?.delta ?? data.props?.delta ?? "";
+                const next = prev + delta;
                 const isSystem = SYSTEM_STREAM_PATTERNS.some((p) => p.test(next.trim()));
                 return isSystem ? "" : next;
               });
-             
-             // Fallback: auto-reset after 60s if session.idle never fires
-             if (streamTimeoutRef.current) clearTimeout(streamTimeoutRef.current);
-             streamTimeoutRef.current = window.setTimeout(() => {
-               console.warn('[SSE] Stream timeout — forcing idle state');
-               setIsStreaming(false);
-               setCurrentMessage("");
-               hasReceivedDeltaRef.current = false;
-               onStreamCompleteRef.current?.();
-             }, 60000);
-            } else if (data.type === "message.updated") {
+
+              if (streamTimeoutRef.current) clearTimeout(streamTimeoutRef.current);
+              streamTimeoutRef.current = window.setTimeout(() => {
+                setIsStreaming(false);
+                setCurrentMessage("");
+                hasReceivedDeltaRef.current = false;
+                onStreamCompleteRef.current?.();
+              }, 60000);
+            } else if (eventType === "message.part.updated") {
+              const part = data.properties?.part;
+              if (!part) return;
+              if (!hasClearedThinkingRef.current) {
+                setCurrentThinkingParts([]);
+                hasClearedThinkingRef.current = true;
+              }
+
+              if (part.type === "tool") {
+                const toolName: string = part.tool || "unknown";
+                const callID: string | undefined = part.callID;
+                const status: string | undefined = part.state?.status;
+
+                if (status === "running" || status === "pending") {
+                  setWaitingForResponse(false);
+                  setIsStreaming(true);
+                  setCurrentToolUse(toolName);
+                  setCurrentThinkingParts(prev => [...prev, {
+                    type: "tool-start" as const,
+                    tool: toolName,
+                    callID,
+                    input: part.state?.input,
+                    timestamp: part.state?.time?.start || Date.now(),
+                  }]);
+
+                  if (toolName === "mcp_question") {
+                    const input = part.state?.input;
+                    const questions = input?.questions || input?.arguments?.questions;
+                    if (Array.isArray(questions) && questions.length > 0) {
+                      const q = questions[0];
+                      setPendingQuestion({
+                        header: q.header || "Question",
+                        question: q.question || "",
+                        options: (q.options || []).map((o: any) => ({
+                          label: o.label || "",
+                          description: o.description || "",
+                        })),
+                        multiple: q.multiple || false,
+                        callID,
+                      });
+                    }
+                  }
+                } else if (status === "completed" || status === "error") {
+                  setCurrentToolUse(null);
+                  if (toolName === "mcp_question") {
+                    setPendingQuestion(null);
+                  }
+                  setCurrentThinkingParts(prev => [...prev, {
+                    type: "tool-end" as const,
+                    tool: toolName,
+                    callID,
+                    output: typeof part.state?.output === "string" ? part.state.output.slice(0, 500) : undefined,
+                    status: status,
+                    timestamp: Date.now(),
+                  }]);
+                }
+              } else if (part.type === "reasoning" && part.text) {
+                setCurrentThinkingParts(prev => [...prev, {
+                  type: "reasoning" as const,
+                  text: part.text,
+                  timestamp: part.time?.start || Date.now(),
+                }]);
+              } else if (part.type === "step-start") {
+                setCurrentThinkingParts(prev => [...prev, {
+                  type: "step-start" as const,
+                  timestamp: part.time?.start || Date.now(),
+                }]);
+              } else if (part.type === "step-finish") {
+                setCurrentThinkingParts(prev => [...prev, {
+                  type: "step-finish" as const,
+                  reason: part.reason,
+                  tokens: part.tokens,
+                  timestamp: Date.now(),
+                }]);
+              }
+            } else if (eventType === "message.updated") {
               if (hasReceivedDeltaRef.current) {
                 setCurrentMessage("");
                 hasReceivedDeltaRef.current = false;
               }
-              // Extract reasoning parts from the updated message
-              const parts = data.parts || data.data?.parts || [];
+              const props = data.properties || data.props || {};
+              const parts = props.info?.parts || data.parts || [];
               if (Array.isArray(parts)) {
                 const reasoningParts: ThinkingPart[] = parts
                   .filter((p: any) => p.type === "reasoning" && p.text)
@@ -135,63 +215,25 @@ export function useChatStream(
                   setCurrentThinkingParts(prev => [...prev, ...reasoningParts]);
                 }
               }
-            } else if (data.type === "session.idle") {
+            } else if (eventType === "session.idle") {
                if (streamTimeoutRef.current) clearTimeout(streamTimeoutRef.current);
                setWaitingForResponse(false);
                setIsStreaming(false);
                setCurrentMessage("");
                hasReceivedDeltaRef.current = false;
-               setCurrentThinkingParts([]);
+
                setPendingQuestion(null);
                onStreamCompleteRef.current?.();
-           } else if (data.type === "tool.execute") {
-              const toolName = data.props?.name || "unknown";
-              setCurrentToolUse(toolName);
-              setCurrentThinkingParts(prev => [...prev, {
-                type: "tool-start" as const,
-                tool: toolName,
-                callID: data.props?.callID,
-                timestamp: Date.now(),
-              }]);
-              if (toolName === "mcp_question") {
-                const input = data.props?.input;
-                const questions = input?.questions || input?.arguments?.questions;
-                if (Array.isArray(questions) && questions.length > 0) {
-                  const q = questions[0];
-                  setPendingQuestion({
-                    header: q.header || "Question",
-                    question: q.question || "",
-                    options: (q.options || []).map((o: any) => ({
-                      label: o.label || "",
-                      description: o.description || "",
-                    })),
-                    multiple: q.multiple || false,
-                    callID: data.props?.callID,
-                  });
-                }
-              }
-           } else if (data.type === "tool.result") {
-              setCurrentToolUse(null);
-              if (data.props?.name === "mcp_question") {
-                setPendingQuestion(null);
-              }
-              setCurrentThinkingParts(prev => [...prev, {
-                type: "tool-end" as const,
-                tool: data.props?.name,
-                callID: data.props?.callID,
-                output: typeof data.props?.result === "string" ? data.props.result.slice(0, 500) : undefined,
-                status: "completed",
-                timestamp: Date.now(),
-              }]);
-          } else if (data.type === "session.updated") {
+          } else if (eventType === "session.updated") {
             const info = data.properties?.info || data.props?.info;
             const updatedSessionId = info?.id;
             const title = info?.title;
             if (updatedSessionId && title) {
               onSessionUpdatedRef.current?.({ id: updatedSessionId, title });
             }
-          } else if (data.type === "session.error") {
-            setError(new Error(data.props?.message || "Session error"));
+          } else if (eventType === "session.error") {
+            const msg = data.properties?.message || data.props?.message;
+            setError(new Error(msg || "Session error"));
             setIsStreaming(false);
           }
         } catch (err) {

@@ -4,6 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { SessionInfo } from "@/app/lib/types";
+import { isRealSession } from "@/app/lib/session-utils";
 
 interface ProjectDetail {
   id: string;
@@ -12,14 +13,6 @@ interface ProjectDetail {
   instructions: string;
   readme: string;
   knowledgeFiles: string[];
-}
-
-const STUB_TITLE_PATTERN = /^New session - \d{4}-\d{2}-\d{2}T/;
-
-function isRealSession(session: SessionInfo): boolean {
-  if (!session.title) return false;
-  if (STUB_TITLE_PATTERN.test(session.title)) return false;
-  return true;
 }
 
 function getRelativeTime(timestamp: number): string {
