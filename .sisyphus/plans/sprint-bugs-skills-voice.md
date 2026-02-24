@@ -568,7 +568,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 5. Investigate TUI/UI message fork issue
+- [x] 5. Investigate TUI/UI message fork issue
 
   **What to do**:
   - User reported: after sending messages from both TUI and dashboard UI to the same session, the agent stops responding in the UI.
@@ -661,7 +661,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 6. Validate thin skill architecture + implement loading mechanism
+- [x] 6. Validate thin skill architecture + implement loading mechanism
 
   **What to do**:
   - **GATE TASK**: This determines how skills work for the rest of the sprint. Must complete before Tasks 7, 8, 9.
@@ -758,7 +758,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 7. Install 29 community skills
+- [x] 7. Install 29 community skills
 
   **What to do**:
   - Install each community skill from the top-50 list (Tiers 1-4, excluding build-ourselves items) into `~/.config/opencode/skills/`
@@ -875,7 +875,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 8. Build 21 custom skills
+- [x] 8. Build 21 custom skills
 
   **What to do**:
   - Build custom SKILL.md files for skills we can't install from community repos. These are Arachne-specific or user-requested features.
@@ -988,7 +988,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 9. Integrate thin skill loading into dispatch layer
+- [x] 9. Integrate thin skill loading into dispatch layer
 
   **What to do**:
   - Based on Task 6's investigation results, wire the thin loading mechanism into the Arachne dispatch pipeline.
@@ -1070,7 +1070,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 10. Create admin/settings menu route stub
+- [x] 10. Create admin/settings menu route stub
 
   **What to do**:
   - Create a new Next.js route at `/admin` (or `/settings`) in the dashboard
@@ -1173,7 +1173,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 11. Add security audit placeholder under admin menu
+- [x] 11. Add security audit placeholder under admin menu
 
   **What to do**:
   - In the `/admin/security` route (created in Task 10), add a "Security Audit" section
@@ -1248,7 +1248,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 12. Validate voice pipeline dependencies locally
+- [x] 12. Validate voice pipeline dependencies locally
 
   **What to do**:
   - The voice pipeline exists but may never have been run end-to-end. Before wiring it up, validate all dependencies are available:
@@ -1331,7 +1331,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 13. Wire voice server to orchestrator startup
+- [x] 13. Wire voice server to orchestrator startup
 
   **What to do**:
   - The voice module has `startVoice()` and `stopVoice()` exports in `voice/index.ts`
@@ -1419,7 +1419,7 @@ Parallel Speedup: ~50% faster — Waves 4+5 run alongside Wave 2+3
 
 ---
 
-- [ ] 14. E2E voice test + dashboard integration verification
+- [x] 14. E2E voice test + dashboard integration verification
 
   **What to do**:
   - Run the full voice pipeline end-to-end: mic input → Whisper STT → LLM Bridge → Kokoro TTS → audio output

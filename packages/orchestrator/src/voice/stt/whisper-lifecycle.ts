@@ -124,7 +124,7 @@ export class WhisperLifecycleManager {
       })
       this.pid = this.processRef.pid
 
-      const timeoutMs = options.healthTimeoutMs ?? 30_000
+      const timeoutMs = options.healthTimeoutMs ?? 90_000
       const intervalMs = options.healthIntervalMs ?? 500
       await this.waitForHealth(url, timeoutMs, intervalMs)
 

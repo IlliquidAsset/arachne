@@ -27,6 +27,7 @@
   "dependencies": {
     "@opencode-ai/plugin": "^1.1.19",
     "@opencode-ai/sdk": "^1.1.19",
+    "kokoro-js": "^1.2.1",
     "zod": "^4.1.8"
   },
   "devDependencies": {

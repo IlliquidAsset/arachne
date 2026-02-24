@@ -11,6 +11,6 @@ export function isRealSession(session: SessionInfo): boolean {
   if (session.parentID) return false;
   if (!session.title) return false;
   if (STUB_TITLE_PATTERN.test(session.title)) return false;
-  if (SYSTEM_SESSION_TITLES.some((t) => session.title === t)) return false;
+  if (SYSTEM_SESSION_TITLES.some((t) => session.title.includes(t))) return false;
   return true;
 }

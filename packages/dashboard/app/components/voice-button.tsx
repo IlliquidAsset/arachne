@@ -5,7 +5,7 @@ import { useVoiceWebSocket } from "@/app/hooks/use-voice-websocket";
 import { VoiceOverlay } from "./voice-overlay";
 
 const WS_URL =
-  process.env.NEXT_PUBLIC_VOICE_WS_URL || "ws://localhost:3200";
+  process.env.NEXT_PUBLIC_VOICE_WS_URL || "ws://localhost:8090";
 
 export function VoiceButton() {
   const [overlayOpen, setOverlayOpen] = useState(false);
