@@ -113,7 +113,7 @@ export class SkillScanner {
 		return [
 			{ scope: "opencode-project", path: `${projectRoot}/.opencode/skills` },
 			{ scope: "opencode", path: `${homeDir}/.config/opencode/oh-my-opencode/skills` },
-			{ scope: "project", path: `${projectRoot}/.opencode/skills` },
+			{ scope: "project", path: `${projectRoot}/.claude/skills` },
 			{ scope: "user", path: `${homeDir}/.config/opencode/skills` },
 		]
 	}

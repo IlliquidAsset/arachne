@@ -20,6 +20,7 @@ export interface DispatchRecord {
 export interface DispatchOptions {
   session?: string
   newSession?: boolean
+  loadSkills?: string[]
 }
 
 export interface DispatchResult {

@@ -97,6 +97,70 @@ function resolveProject(
   }
 }
 
+
+interface ResolvedSkill {
+  name: string
+  content: string
+}
+
+async function resolveSkillSystem(
+  loadSkills: string[] | undefined,
+  projectPath: string,
+): Promise<string | undefined> {
+  if (!loadSkills || loadSkills.length === 0) return undefined
+
+  const { readFile, readdir } = await import("node:fs/promises")
+  const { existsSync } = await import("node:fs")
+  const { homedir } = await import("node:os")
+
+  const home = homedir()
+  const skillDirs = [
+    `${projectPath}/.opencode/skills`,
+    `${home}/.config/opencode/oh-my-opencode/skills`,
+    `${projectPath}/.claude/skills`,
+    `${home}/.config/opencode/skills`,
+  ]
+
+  const found = new Map<string, ResolvedSkill>()
+
+  for (const dir of skillDirs) {
+    if (!existsSync(dir)) continue
+    try {
+      const entries = await readdir(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue
+        const skillPath = `${dir}/${entry.name}/SKILL.md`
+        try {
+          const raw = await readFile(skillPath, "utf-8")
+          const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/)
+          if (!match) continue
+          const lines = match[1].split("\n")
+          const nameLine = lines.find((l: string) => l.startsWith("name:"))
+          if (!nameLine) continue
+          const name = nameLine.replace("name:", "").trim().replace(/^["']|["']$/g, "")
+          if (!found.has(name)) {
+            found.set(name, { name, content: match[2].trim() })
+          }
+        } catch {
+          // skip unreadable
+        }
+      }
+    } catch {
+      // skip unreadable dirs
+    }
+  }
+
+  const matched = loadSkills
+    .map(name => found.get(name))
+    .filter((s): s is ResolvedSkill => s != null)
+
+  if (matched.length === 0) return undefined
+
+  return matched
+    .map(s => `<skill name="${s.name}">\n${s.content}\n</skill>`)
+    .join("\n\n")
+}
+
 export function createDispatch(dependencies: DispatchDependencies) {
   return async function dispatch(
     projectName: string,
@@ -154,8 +218,11 @@ export function createDispatch(dependencies: DispatchDependencies) {
         dependencies,
       )
 
+      const skillSystem = await resolveSkillSystem(opts?.loadSkills, project.absolutePath)
+
       await dependencies.sendMessageAsyncFn(client, sessionId, {
         parts: [{ type: "text", text: cleanedMessage }],
+        ...(skillSystem ? { system: skillSystem } : {}),
       })
 
       dependencies.tracker.record({
