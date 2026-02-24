@@ -170,7 +170,7 @@ Wave 3 (After Wave 2):
 
 ## TODOs
 
-- [ ] 1. Fix Chrome CDP Manager + Critical Bugs
+- [x] 1. Fix Chrome CDP Manager + Critical Bugs
 
   **What to do**:
   - Replace `import { ensureChromeReady } from './chrome-preflight'` with imports from `../../social-poster/src/chrome-bridge` in `daily-workflow.ts`
@@ -273,7 +273,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 2. Split Config into UserConfig + RuntimeState
+- [x] 2. Split Config into UserConfig + RuntimeState
 
   **What to do**:
   - Rewrite `~/.config/opencode/skills/workflow-orchestrator/src/types.ts`:
@@ -396,7 +396,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 3. Content Source Abstraction + Type Rename
+- [x] 3. Content Source Abstraction + Type Rename
 
   **What to do**:
   - Define `ContentSource` interface in `types.ts`:
@@ -542,7 +542,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 4. CLI Init Wizard
+- [x] 4. CLI Init Wizard
 
   **What to do**:
   - Add `init` command to `cli.ts` with ≤5 interactive prompts using Node.js `readline`:
@@ -638,7 +638,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 5. CronScheduler in Autonomy Package
+- [x] 5. CronScheduler in Autonomy Package
 
   **What to do**:
   - Create `packages/autonomy/src/cron-scheduler.ts`:
@@ -758,7 +758,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 6. Delete Dead Code + Portability Sweep
+- [x] 6. Delete Dead Code + Portability Sweep
 
   **What to do**:
   - Delete `~/.config/opencode/skills/workflow-orchestrator/run-daily.sh` — dead code with hardcoded `/Users/kendrick`
@@ -856,7 +856,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 7. Wire CronScheduler to Builtin Workflows
+- [x] 7. Wire CronScheduler to Builtin Workflows
 
   **What to do**:
   - Update `packages/autonomy/src/builtin-workflows.ts`:
@@ -941,7 +941,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 8. Tests for CronScheduler
+- [x] 8. Tests for CronScheduler
 
   **What to do**:
   - Create `packages/autonomy/src/__tests__/cron-scheduler.test.ts`:
@@ -1016,7 +1016,7 @@ Wave 3 (After Wave 2):
 
 ---
 
-- [ ] 9. End-to-End Dry-Run Verification
+- [x] 9. End-to-End Dry-Run Verification
 
   **What to do**:
   - Create a test user config via `workflow-orchestrator init --non-interactive` (or write config JSON directly)

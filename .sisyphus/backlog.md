@@ -45,19 +45,46 @@ Currently, thinking/reasoning content appears to be buffered and shown only when
 
 ---
 
+## Dashboard — Mobile
+
+### Mobile Responsiveness Overhaul
+**Priority**: High
+**Source**: User report (Feb 24, 2026) — rated current state 4/10
+
+Mobile experience needs significant work. User couldn't share screenshot evidence because image input doesn't exist yet (see Image Paste item below).
+
+**Needs investigation**: What specifically is broken? Layout overflow, touch targets too small, sidebar behavior, chat input sizing, text truncation? Need to audit with Playwright at mobile viewports (375x812, 390x844, 428x926) and catalog every issue.
+
+---
+
 ## Dashboard — Interaction
+
+### Question Tool Rendering (BROKEN — Prometheus interviews don't work)
+**Priority**: HIGH
+**Source**: Dogfooding discovery + user report (Feb 24, 2026)
+
+Interactive selection UI for the Question tool is missing — shows "question running..." in drawer instead of rendering the selection options. **This directly breaks Prometheus interview flows** — when Prometheus asks multiple-choice questions during planning, the user can't see or answer them in the dashboard.
+
+**Impact**: Core planning workflow is broken in dashboard. Users must use CLI for Prometheus interviews.
+
+### Image Paste + Document Upload in Chat Input
+**Priority**: High
+**Source**: User request (Feb 24, 2026)
+
+Chat input should support:
+- **Clipboard image paste**: Paste screenshots/images directly into the chat input (Ctrl+V / Cmd+V). Any standard method works — data URL, blob upload, base64 inline.
+- **Document upload**: Upload files (PDF, images, text docs) as attachments to messages.
+
+**Open questions**:
+- How does the OpenCode server handle image/file attachments in messages? Need to check the API.
+- Max file size limits?
+- Preview thumbnails in chat input before sending?
 
 ### (From Master Plan) Message Queuing
 **Priority**: Medium
 **Source**: Dogfooding discovery
 
 Can't type while agent is working (CLI can, dashboard can't). Need message queuing.
-
-### (From Master Plan) Question Tool Rendering  
-**Priority**: Medium
-**Source**: Dogfooding discovery
-
-Interactive selection UI for the Question tool is missing — shows "question running..." in drawer instead of rendering the selection options.
 
 ---
 
