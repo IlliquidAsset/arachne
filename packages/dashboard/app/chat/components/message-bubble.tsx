@@ -1,11 +1,13 @@
 "use client";
 import { StreamingText } from "./streaming-text";
+import type { MessagePart } from "@/app/hooks/use-messages";
 
 interface MessageBubbleProps {
   messageRole: "user" | "assistant";
   content: string;
   timestamp: number;
   isStreaming?: boolean;
+  parts?: MessagePart[];
 }
 
 export function MessageBubble({
@@ -13,6 +15,7 @@ export function MessageBubble({
   content,
   timestamp,
   isStreaming = false,
+  parts = [],
 }: MessageBubbleProps) {
   const isUser = messageRole === "user";
 
@@ -33,6 +36,35 @@ export function MessageBubble({
           {isUser ? "You" : "Amanda"}
         </div>
         <StreamingText text={content} isStreaming={isStreaming} />
+        
+        {/* Render file parts */}
+        {parts.map((part, i) => {
+          if (part.type === "file" && part.url) {
+            if (part.mime?.startsWith("image/")) {
+              return (
+                <img
+                  key={i}
+                  src={part.url}
+                  alt={part.filename || "Image"}
+                  className="max-w-md rounded-md mt-2"
+                />
+              );
+            }
+            return (
+              <div
+                key={i}
+                className="border rounded-md p-2 mt-2 flex items-center gap-2 bg-muted/30"
+              >
+                <span className="text-2xl">📄</span>
+                <span className="text-sm font-medium">
+                  {part.filename || "Document"}
+                </span>
+              </div>
+            );
+          }
+          return null;
+        })}
+        
         <div className="text-xs opacity-70 mt-1">
           {new Date(timestamp).toLocaleTimeString()}
         </div>

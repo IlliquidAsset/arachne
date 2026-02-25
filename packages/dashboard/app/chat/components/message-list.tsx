@@ -62,15 +62,16 @@ export function MessageList({
         </div>
       )}
 
-      {messages.map((msg, index) => (
-        <div key={`${msg.id}-${index}`} data-message-index={index}>
-          <MessageBubble
-            messageRole={msg.role}
-            content={msg.content}
-            timestamp={msg.timestamp}
-          />
-        </div>
-      ))}
+       {messages.map((msg, index) => (
+         <div key={`${msg.id}-${index}`} data-message-index={index}>
+           <MessageBubble
+             messageRole={msg.role}
+             content={msg.content}
+             timestamp={msg.timestamp}
+             parts={msg.parts}
+           />
+         </div>
+       ))}
 
       {(waitingForResponse || (isStreaming && !currentMessage)) && (
         <div className="flex justify-start mb-4">
