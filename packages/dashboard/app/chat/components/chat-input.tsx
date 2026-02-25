@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent, type RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import { useSendMessage } from "@/app/hooks/use-send-message";
-import { useTapToDictate } from "@/app/hooks/use-tap-to-dictate";
 
 const MAX_HEIGHT_PX = 144;
 
@@ -22,7 +21,6 @@ export function ChatInput({
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { send, abort, isSending } = useSendMessage(sessionId);
-  const { startDictation, stopDictation, isRecording, transcription } = useTapToDictate();
 
   const autoResize = useCallback(() => {
     if (textareaRef.current) {
@@ -35,13 +33,6 @@ export function ChatInput({
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
-  
-  useEffect(() => {
-     if (transcription) {
-       setInput((prev) => prev + (prev ? " " : "") + transcription);
-       autoResize();
-     }
-   }, [transcription, autoResize]);
 
   const messageQueueRef = useRef<string[]>([]);
   const isProcessingQueueRef = useRef(false);
@@ -103,32 +94,11 @@ export function ChatInput({
   const inputDisabled = isSending || isSessionBusy;
   const sendDisabled = isSending || isSessionBusy || !input.trim();
   const queuedCount = messageQueueRef.current.length;
-  
-  const handleMicClick = () => {
-    if (isRecording) {
-      stopDictation();
-    } else {
-      startDictation();
-    }
-  };
 
   return (
     <div className="border-t border-border p-4">
       <div className="flex items-end gap-2">
-         <Button
-           type="button"
-           variant={isRecording ? "destructive" : "outline"}
-           size="icon"
-           className="shrink-0"
-           onClick={handleMicClick}
-           disabled={isSending || isStreaming}
-           aria-label={isRecording ? "Stop recording" : "Start voice input"}
-           data-testid="mic-dictate-button"
-         >
-          {isRecording ? "⏺" : "🎤"}
-        </Button>
-
-         <textarea
+        <textarea
             ref={textareaRef}
             value={input}
             onChange={handleChange}

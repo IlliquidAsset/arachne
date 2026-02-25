@@ -6,7 +6,8 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "cp node_modules/onnxruntime-web/dist/*.wasm public/ 2>/dev/null || true && cp node_modules/onnxruntime-web/dist/*.mjs public/ 2>/dev/null || true && cp node_modules/@ricky0123/vad-web/dist/silero_vad_v5.onnx public/ 2>/dev/null || true"
   },
   "dependencies": {
     "@arachne/shared": "workspace:*",
@@ -18,6 +19,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.575.0",
     "next": "16.1.6",
+    "onnxruntime-web": "^1.17.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",

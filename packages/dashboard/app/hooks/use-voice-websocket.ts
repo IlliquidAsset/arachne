@@ -143,6 +143,8 @@ export function useVoiceWebSocket(wsUrl: string) {
     try {
       const vadWeb = await import("@ricky0123/vad-web");
       const vad = await vadWeb.MicVAD.new({
+        model: "v5",
+        onnxWASMBasePath: "/",
         positiveSpeechThreshold: 0.8,
         negativeSpeechThreshold: 0.3,
         redemptionMs: 8,
