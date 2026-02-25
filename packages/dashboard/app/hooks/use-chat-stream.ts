@@ -43,6 +43,17 @@ interface ChatStreamOptions {
   onSessionUpdated?: (sessionInfo: { id: string; title: string }) => void;
 }
 
+function getEventSessionId(data: Record<string, unknown>): string | undefined {
+  const props = (data.properties || data.props) as Record<string, unknown> | undefined;
+  if (!props) return undefined;
+  if (typeof props.sessionID === "string") return props.sessionID;
+  const part = props.part as Record<string, unknown> | undefined;
+  if (part && typeof part.sessionID === "string") return part.sessionID;
+  const info = props.info as Record<string, unknown> | undefined;
+  if (info && typeof info.sessionID === "string") return info.sessionID;
+  return undefined;
+}
+
 export function useChatStream(
   sessionId: string | null,
   options?: ChatStreamOptions,
@@ -101,6 +112,19 @@ export function useChatStream(
          try {
            const data = JSON.parse(event.data);
            const eventType = data.type as string | undefined;
+
+           const eventSessionId = getEventSessionId(data);
+           if (eventSessionId && eventSessionId !== sessionId) {
+             if (eventType === "session.updated") {
+               const info = data.properties?.info || data.props?.info;
+               const updatedSessionId = info?.id;
+               const title = info?.title;
+               if (updatedSessionId && title) {
+                 onSessionUpdatedRef.current?.({ id: updatedSessionId, title });
+               }
+             }
+             return;
+           }
 
            if (eventType === "message.part.delta") {
               if (!hasClearedThinkingRef.current) {
