@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "cp node_modules/onnxruntime-web/dist/*.wasm public/ 2>/dev/null || true && cp node_modules/onnxruntime-web/dist/*.mjs public/ 2>/dev/null || true && cp node_modules/@ricky0123/vad-web/dist/silero_vad_v5.onnx public/ 2>/dev/null || true"
+    "postinstall": "cp node_modules/onnxruntime-web/dist/*.wasm public/ 2>/dev/null || true && cp node_modules/onnxruntime-web/dist/*.mjs public/ 2>/dev/null || true && cp node_modules/@ricky0123/vad-web/dist/silero_vad_v5.onnx public/ 2>/dev/null || true && cp node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js public/ 2>/dev/null || true"
   },
   "dependencies": {
     "@arachne/shared": "workspace:*",
