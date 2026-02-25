@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 export interface MessagePart {
-  type: "text" | "reasoning" | "tool" | "step-start" | "step-finish";
+  type: "text" | "reasoning" | "tool" | "step-start" | "step-finish" | "file";
   text?: string;
   tool?: string;
   callID?: string;
@@ -22,6 +22,9 @@ export interface MessagePart {
     reasoning: number;
   };
   cost?: number;
+  mime?: string;
+  url?: string;
+  filename?: string;
 }
 
 export interface Message {
@@ -85,6 +88,9 @@ export function useMessages(sessionId: string | null) {
             reason: p.reason,
             tokens: p.state?.tokens || p.tokens,
             cost: p.state?.cost || p.cost,
+            mime: p.mime,
+            url: p.url,
+            filename: p.filename,
           })),
         }))
         .filter((msg: Message) => msg.content.trim() !== "" || msg.parts.some((p: MessagePart) => p.type !== "text"))

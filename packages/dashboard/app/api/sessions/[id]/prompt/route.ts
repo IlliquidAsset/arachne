@@ -14,17 +14,23 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { text, model, agent, system } = body;
+    const { text, parts, model, agent, system } = body;
 
-    if (!text) {
-      return jsonResponse({ error: "Text is required" }, 400);
+    // Support both legacy text field and new parts array
+    let finalParts: any[];
+    if (parts && Array.isArray(parts)) {
+      finalParts = parts;
+    } else if (text) {
+      finalParts = [{ type: "text", text }];
+    } else {
+      return jsonResponse({ error: "Text or parts is required" }, 400);
     }
 
     const client = getAuthenticatedClient(authResult);
     const result = await client.session.promptAsync({
       path: { id },
       body: {
-        parts: [{ type: "text", text }],
+        parts: finalParts,
         model,
         agent,
         system,

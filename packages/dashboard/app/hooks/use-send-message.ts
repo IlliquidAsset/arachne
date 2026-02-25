@@ -1,24 +1,37 @@
 "use client";
 import { useState, useCallback } from "react";
 
+export interface FilePart {
+  type: "file";
+  mime: string;
+  url: string;
+  filename?: string;
+}
+
 export function useSendMessage(sessionId: string | null) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, files?: FilePart[]) => {
       if (!sessionId || !text.trim()) return;
 
       setIsSending(true);
       setError(null);
 
       try {
+        const parts = files && files.length > 0
+          ? [{ type: "text" as const, text: text.trim() }, ...files]
+          : undefined;
+
         const response = await fetch(
           `/api/sessions/${sessionId}/prompt`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: text.trim() }),
+            body: JSON.stringify(
+              parts ? { parts } : { text: text.trim() }
+            ),
           },
         );
 
