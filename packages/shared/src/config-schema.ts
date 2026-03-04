@@ -36,11 +36,20 @@ const FeaturesSchema = z.object({
   autonomy: z.boolean().default(DEFAULT_FEATURES.autonomy),
 }).default({ ...DEFAULT_FEATURES });
 
+const NotionIntegrationConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+}).default({ enabled: false });
+
+const IntegrationsSchema = z.object({
+  notion: NotionIntegrationConfigSchema,
+}).default({ notion: { enabled: false } });
+
 export const ArachneGlobalConfigSchema = z.object({
   ports: PortsSchema,
   paths: PathsSchema,
   providers: ProvidersSchema,
   features: FeaturesSchema,
+  integrations: IntegrationsSchema,
 });
 
 export type ArachneGlobalConfig = z.infer<typeof ArachneGlobalConfigSchema>;

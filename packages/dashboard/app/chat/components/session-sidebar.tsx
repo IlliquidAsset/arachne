@@ -169,6 +169,19 @@ function SessionList({ sessions, activeSessionId, onSessionSelect, onNewChat, on
             })}
         </div>
       </div>
+
+      <Separator />
+
+      <div className="p-2">
+        <Link
+          href="/admin"
+          className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
+          data-testid="sidebar-admin-link"
+        >
+          <span className="text-base shrink-0">&#9881;</span>
+          <span>Settings</span>
+        </Link>
+      </div>
     </div>
   );
 }

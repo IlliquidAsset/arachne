@@ -8,6 +8,8 @@ const NAV_ITEMS = [
   { href: "/admin/skills", label: "Skills", icon: "🧩" },
   { href: "/admin/workflows", label: "Workflows", icon: "⚡" },
   { href: "/admin/voice", label: "Voice", icon: "🎤" },
+  { href: "/admin/integrations", label: "Integrations", icon: "🔗" },
+  { href: "/admin/scheduled-tasks", label: "Scheduled Tasks", icon: "🕐" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

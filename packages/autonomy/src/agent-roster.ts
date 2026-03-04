@@ -74,6 +74,40 @@ const AGENTS: AgentEntry[] = [
     specialty: "external research",
     whenToInvoke: ["docs", "best practice", "library", "how do others"],
   },
+  {
+    name: "hephaestus",
+    specialty: "build and infrastructure",
+    whenToInvoke: [
+      "build",
+      "deploy",
+      "ci/cd",
+      "infrastructure",
+      "devops",
+      "pipeline",
+      "docker",
+      "kubernetes",
+      "terraform",
+      "packaging",
+    ],
+  },
+  {
+    name: "headhunter",
+    specialty: "job search and career strategy",
+    whenToInvoke: [
+      "job search",
+      "apply",
+      "resume",
+      "cover letter",
+      "job posting",
+      "career",
+      "recruit",
+      "hiring",
+      "interview",
+      "compensation",
+      "job board",
+      "application",
+    ],
+  },
 ];
 
 const AGENT_ALIASES = new Map<string, string>([["da", "devils-advocate"]]);

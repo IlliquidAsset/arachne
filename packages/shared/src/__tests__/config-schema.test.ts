@@ -21,6 +21,7 @@ describe("config-schema", () => {
           runpod: { envVar: "RUNPOD_API_KEY" },
         },
         features: { voice: false, web: true, autonomy: true },
+        integrations: { notion: { enabled: false } },
       };
 
       const result = ArachneGlobalConfigSchema.safeParse(config);

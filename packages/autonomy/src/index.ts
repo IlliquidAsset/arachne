@@ -69,3 +69,18 @@ export {
   type ScheduledJob,
   type CronSchedulerOptions,
 } from "./cron-scheduler.js";
+
+export {
+  ScheduledTaskStore,
+  type ScheduledTask,
+  type CreateScheduledTask,
+  type UpdateScheduledTask,
+} from "./scheduled-tasks.js";
+
+export {
+  ScheduledTaskRunner,
+  type ScheduledTaskDispatcher,
+  type ScheduledTaskRunnerOptions,
+} from "./scheduled-task-runner.js";
+
+export { registerBuiltinScheduledTasks } from "./builtin-scheduled-tasks.js";

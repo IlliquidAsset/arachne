@@ -8,6 +8,7 @@ interface MessageBubbleProps {
   timestamp: number;
   isStreaming?: boolean;
   parts?: MessagePart[];
+  agentName?: string;
 }
 
 export function MessageBubble({
@@ -16,8 +17,10 @@ export function MessageBubble({
   timestamp,
   isStreaming = false,
   parts = [],
+  agentName,
 }: MessageBubbleProps) {
   const isUser = messageRole === "user";
+  const displayName = isUser ? "You" : agentName || "Amanda";
 
   return (
     <div
@@ -32,8 +35,8 @@ export function MessageBubble({
             : "bg-card text-card-foreground"
         }`}
       >
-        <div className="text-xs font-medium mb-1">
-          {isUser ? "You" : "Amanda"}
+        <div className="text-xs font-medium mb-1 capitalize">
+          {displayName}
         </div>
         <StreamingText text={content} isStreaming={isStreaming} />
         

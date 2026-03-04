@@ -14,6 +14,8 @@ import {
   type ServerInfo,
 } from "./server"
 import { startVoice } from "./voice"
+import { getNotionToken } from "./notion/integrations"
+import { createNotionTools } from "./notion/tools"
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
@@ -125,8 +127,14 @@ const ArachneOrchestratorPlugin: Plugin = async (ctx) => {
     })
   }
 
+  // Load Notion tools if a token is configured
+  const notionToken = getNotionToken()
+  const notionTools = notionToken ? createNotionTools(notionToken) : {}
+
   return {
     tool: {
+      ...notionTools,
+
       arachne_dispatch: tool({
         description:
           "Dispatch a task to an Arachne agent instance in a specific project",

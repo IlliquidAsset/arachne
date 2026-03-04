@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dashboard",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--filter", "@arachne/dashboard", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "web-api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "packages/web/src/server/index.ts"],
+      "port": 3100
+    }
+  ]
+}

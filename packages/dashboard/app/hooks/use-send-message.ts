@@ -8,12 +8,17 @@ export interface FilePart {
   filename?: string;
 }
 
+export interface SendOptions {
+  agent?: string;
+  model?: string;
+}
+
 export function useSendMessage(sessionId: string | null) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const send = useCallback(
-    async (text: string, files?: FilePart[]) => {
+    async (text: string, files?: FilePart[], options?: SendOptions) => {
       if (!sessionId || !text.trim()) return;
 
       setIsSending(true);
@@ -24,14 +29,16 @@ export function useSendMessage(sessionId: string | null) {
           ? [{ type: "text" as const, text: text.trim() }, ...files]
           : undefined;
 
+        const body: Record<string, unknown> = parts ? { parts } : { text: text.trim() };
+        if (options?.agent) body.agent = options.agent;
+        if (options?.model) body.model = options.model;
+
         const response = await fetch(
           `/api/sessions/${sessionId}/prompt`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(
-              parts ? { parts } : { text: text.trim() }
-            ),
+            body: JSON.stringify(body),
           },
         );
 
