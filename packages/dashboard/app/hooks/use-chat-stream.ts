@@ -264,7 +264,9 @@ export function useChatStream(
                setWaitingForResponse(false);
                setIsStreaming(false);
                setCurrentMessage("");
+               setCurrentThinkingParts([]);
                hasReceivedDeltaRef.current = false;
+               hasClearedThinkingRef.current = false;
                currentAgentRef.current = undefined;
 
                setPendingQuestion(null);

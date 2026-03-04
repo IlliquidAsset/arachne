@@ -13,6 +13,7 @@ import { useMessages } from "@/app/hooks/use-messages";
 import { useChatStream } from "@/app/hooks/use-chat-stream";
 import { useThinking } from "@/app/hooks/use-thinking";
 import { useSendMessage } from "@/app/hooks/use-send-message";
+import { useAgents } from "@/app/hooks/use-agents";
 
 function ChatContent() {
   const {
@@ -42,6 +43,9 @@ function ChatContent() {
   });
 
   const { send: sendMessage } = useSendMessage(activeSessionId);
+  const { agents } = useAgents();
+  const [selectedAgent, setSelectedAgent] = useState("sisyphus");
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const thinkingSessions = useThinking(messages, currentThinkingParts, activeSessionId);
 
   const handleQuestionAnswer = useCallback(async (answer: string) => {
@@ -214,6 +218,11 @@ function ChatContent() {
         isStreaming={isStreaming}
         isSessionBusy={isSessionBusy}
         onOptimisticSend={handleSend}
+        agents={agents}
+        selectedAgent={selectedAgent}
+        selectedModel={selectedModel}
+        onAgentChange={setSelectedAgent}
+        onModelChange={setSelectedModel}
       />
     </>
   );

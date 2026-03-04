@@ -32,7 +32,7 @@ export function ThinkingDrawer({ isOpen, thinkingSessions, isThinking, scrollRef
         data-testid="thinking-scroll"
       >
         {thinkingSessions.length === 0 ? (
-          <EmptyState />
+          isThinking ? <ThinkingIndicator /> : <EmptyState />
         ) : (
           thinkingSessions.map((session) => (
             <div
@@ -78,7 +78,7 @@ export function MobileThinkingDrawer({ isOpen, onOpenChange, thinkingSessions, i
         </div>
         <div className="flex-1 overflow-y-auto p-3">
           {thinkingSessions.length === 0 ? (
-            <EmptyState />
+            isThinking ? <ThinkingIndicator /> : <EmptyState />
           ) : (
             thinkingSessions.map((session) => (
               <div
@@ -99,6 +99,16 @@ export function MobileThinkingDrawer({ isOpen, onOpenChange, thinkingSessions, i
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function ThinkingIndicator() {
+  return (
+    <div className="text-center text-muted-foreground text-sm mt-8">
+      <div className="text-2xl mb-2 animate-pulse">🧠</div>
+      <div className="animate-pulse">Thinking...</div>
+      <div className="text-xs mt-1">Reasoning will appear as it streams in</div>
+    </div>
   );
 }
 

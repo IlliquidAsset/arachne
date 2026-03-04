@@ -238,7 +238,7 @@ export function ChatInput({
                   </div>
                 ) : (
                   <div className="border rounded p-2 flex items-center gap-2 bg-muted">
-                    <span className="text-base">&#128196;</span>
+                    <span className="text-base">{"\uD83D\uDCC4"}</span>
                     <div className="text-xs">
                       <div>{file.name}</div>
                       <div className="text-muted-foreground">
@@ -358,7 +358,7 @@ export function ChatInput({
             data-testid="stop-button"
             aria-label="Stop generation"
           >
-            &#9209;
+            {"\u23F9"}
           </Button>
         )}
         <Button
@@ -370,7 +370,7 @@ export function ChatInput({
           data-testid="send-button"
           aria-label={isStreaming ? "Queue message" : "Send message"}
         >
-          {isStreaming ? "&#8987;" : "&#8593;"}
+          {isStreaming ? "\u23F3" : "\u2191"}
         </Button>
       </div>
     </div>
